@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import MenuItem from '../MenuItem'
-import FloatingCart from '../FloatingCart'  // ← Floating cart
+import FloatingCart from '../FloatingCart'
 
 export default function MenuPage() {
   const [categories, setCategories] = useState([])
@@ -46,25 +46,25 @@ export default function MenuPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-red-50 to-orange-50 flex items-center justify-center">
         <p className="text-3xl font-bold text-red-600">Loading Delicious Menu...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-50 to-orange-50 relative">
-      {/* TOP HORIZONTAL CATEGORIES — VISIBLE BY DEFAULT ON ALL DEVICES */}
+    <div className="min-h-screen bg-gradient-to-b from-red-50 to-orange-50">
+      {/* HORIZONTAL CATEGORIES — SMALLER BUTTONS, ALWAYS VISIBLE */}
       <div className="bg-white shadow-lg sticky top-0 z-40">
         <div className="overflow-x-auto scrollbar-hide px-4 py-4">
-          <div className="flex gap-4 min-w-max">
+          <div className="flex gap-3 min-w-max">
             {categories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-8 py-4 rounded-full text-lg font-bold whitespace-nowrap transition-all duration-300 ${
+                className={`px-6 py-3 rounded-full text-sm sm:text-base font-bold whitespace-nowrap transition-all duration-300 ${
                   selectedCategory?.id === cat.id
-                    ? 'bg-red-600 text-white shadow-xl scale-110'
+                    ? 'bg-red-600 text-white shadow-md scale-105'
                     : 'bg-gray-100 text-gray-800 hover:bg-red-100'
                 }`}
               >
@@ -76,7 +76,7 @@ export default function MenuPage() {
       </div>
 
       {/* MAIN ITEMS GRID */}
-      <div className="px-4 py-8 lg:py-12 pb-32">  {/* Extra bottom padding for floating cart */}
+      <div className="px-4 py-8 lg:py-12 pb-32">
         <h1 className="text-4xl lg:text-6xl font-black text-center text-red-700 mb-8 lg:mb-12 uppercase tracking-wide">
           {selectedCategory?.name || 'Our Menu'}
         </h1>
@@ -94,7 +94,7 @@ export default function MenuPage() {
         )}
       </div>
 
-      {/* FLOATING CART — VISIBLE ON MENU PAGE */}
+      {/* FLOATING CART */}
       <FloatingCart />
     </div>
   )

@@ -1,12 +1,21 @@
 // app/cart-context.js
 'use client'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useState, useEffect } from 'react'
 
 const CartContext = createContext()
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([])
-  const [takeawayFee, setTakeawayFee] = useState(0)  // 0 = Dine-in, 1000 = Takeaway (in paise)
+  const [takeawayFee, setTakeawayFee] = useState(0)  // 0, 500 (₹5), or 1000 (₹10)
+
+  // Update fee whenever cart changes AND takeaway is selected
+  useEffect(() => {
+    if (takeawayFee > 0) {  // Only recalculate if takeaway is active
+      const itemsCount = cart.reduce((sum, i) => sum + i.quantity, 0)
+      const newFee = itemsCount === 1 ? 500 : itemsCount > 1 ? 1000 : 0
+      setTakeawayFee(newFee)
+    }
+  }, [cart])
 
   const addToCart = (item, variant) => {
     setCart(prev => {
@@ -28,12 +37,9 @@ export function CartProvider({ children }) {
 
   const clearCart = () => setCart([])
 
-  // Cart calculations
   const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0)
-
   const subtotal = cart.reduce((sum, i) => sum + (i.variant.price / 100) * i.quantity, 0)
-
-  const totalPrice = subtotal + (takeawayFee / 100)  // Add packaging fee if takeaway
+  const totalPrice = subtotal + (takeawayFee / 100)
 
   return (
     <CartContext.Provider value={{
@@ -44,9 +50,9 @@ export function CartProvider({ children }) {
       clearCart,
       totalItems,
       totalPrice,
-      subtotal,               // Subtotal without fee
-      takeawayFee,            // Current fee (in paise)
-      setTakeawayFee,         // To toggle dine-in/takeaway
+      subtotal,
+      takeawayFee,
+      setTakeawayFee
     }}>
       {children}
     </CartContext.Provider>
