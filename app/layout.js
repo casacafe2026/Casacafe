@@ -1,12 +1,12 @@
 // app/layout.js
 import './globals.css'
-import { Playfair_Display } from 'next/font/google'
+import { Inter } from 'next/font/google'
 import Header from './Header'
 import { CartProvider } from './cart-context'
 
-const playfair = Playfair_Display({
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '700'],
+  weight: ['400', '500', '600', '700'],
 })
 
 export const metadata = {
@@ -17,7 +17,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={playfair.className}>
+      <body className={inter.className}>
         <CartProvider>
           {/* Customer navbar with Menu, Special, Combos, Cart */}
           <Header />

@@ -1,4 +1,3 @@
-// app/menu/page.js
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -46,27 +45,28 @@ export default function MenuPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-red-50 to-orange-50 flex items-center justify-center">
-        <p className="text-3xl font-bold text-red-600">Loading Delicious Menu...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#2f0f24]">
+        <p className="text-3xl font-bold text-[#DCBF98]">Loading Delicious Menu...</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-50 to-orange-50">
-      {/* HORIZONTAL CATEGORIES — SMALLER BUTTONS, ALWAYS VISIBLE */}
-      <div className="bg-white shadow-lg sticky top-0 z-40">
-        <div className="overflow-x-auto scrollbar-hide px-4 py-4">
+    <div className="min-h-screen bg-[#2f0f24]">
+      {/* Categories Bar */}
+      <div className="sticky top-0 z-40 bg-[#2f0f24] border-b border-[#DCBF98]/30">
+        <div className="overflow-x-auto px-4 py-4">
           <div className="flex gap-3 min-w-max">
             {categories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-6 py-3 rounded-full text-sm sm:text-base font-bold whitespace-nowrap transition-all duration-300 ${
-                  selectedCategory?.id === cat.id
-                    ? 'bg-red-600 text-white shadow-md scale-105'
-                    : 'bg-gray-100 text-gray-800 hover:bg-red-100'
-                }`}
+                className={`px-6 py-3 rounded-full text-sm sm:text-base font-bold whitespace-nowrap transition-all duration-300 border`}
+                style={{
+                  backgroundColor: selectedCategory?.id === cat.id ? '#DCBF98' : '#2f0f24',
+                  color: selectedCategory?.id === cat.id ? '#2f0f24' : '#DCBF98',
+                  borderColor: '#DCBF98'
+                }}
               >
                 {cat.name.toUpperCase()}
               </button>
@@ -75,15 +75,18 @@ export default function MenuPage() {
         </div>
       </div>
 
-      {/* MAIN ITEMS GRID */}
+      {/* Items Grid */}
       <div className="px-4 py-8 lg:py-12 pb-32">
-        <h1 className="text-4xl lg:text-6xl font-black text-center text-red-700 mb-8 lg:mb-12 uppercase tracking-wide">
+        <h1
+          className="text-4xl lg:text-6xl font-black text-center mb-8 lg:mb-12 uppercase tracking-wide"
+          style={{ color: '#DCBF98' }}
+        >
           {selectedCategory?.name || 'Our Menu'}
         </h1>
 
         {selectedCategory?.items?.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-2xl text-gray-600 font-medium">No items yet — coming soon!</p>
+            <p className="text-2xl text-[#DCBF98] font-medium">No items yet — coming soon!</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-10">
@@ -94,7 +97,7 @@ export default function MenuPage() {
         )}
       </div>
 
-      {/* FLOATING CART */}
+      {/* Floating Cart */}
       <FloatingCart />
     </div>
   )

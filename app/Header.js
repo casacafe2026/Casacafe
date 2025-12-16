@@ -12,34 +12,42 @@ export default function Header() {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
 
   return (
-    <header className="bg-gradient-to-r from-amber-700 to-orange-700 text-white sticky top-0 z-50 shadow-2xl">
+    <header className="sticky top-0 z-50 shadow-2xl" style={{ backgroundColor: '#2f0f24', color: '#DCBF98' }}>
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           {/* Logo / Brand Name - top left, premium font */}
           <Link
             href="/"
             className="text-3xl sm:text-4xl font-bold tracking-wide"
-            style={{ fontFamily: 'Playfair Display, serif' }}
+            style={{ fontFamily: 'Playfair Display, serif', color: '#DCBF98' }}
           >
             CASA CAFE
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8 lg:gap-10 text-lg lg:text-xl font-medium">
-            <Link href="/menu" className="hover:text-amber-200 transition">
+            <Link href="/menu" className="transition" style={{ color: '#DCBF98' }}>
               Menu
             </Link>
-            <Link href="/menu#special" className="hover:text-amber-200 transition">
+            <Link href="/menu#special" className="transition" style={{ color: '#DCBF98' }}>
               Today's Special
             </Link>
-            <Link href="/menu#combos" className="hover:text-amber-200 transition">
+            <Link href="/menu#combos" className="transition" style={{ color: '#DCBF98' }}>
               Combos
             </Link>
 
             <Link href="/cart" className="relative">
-              <ShoppingCart size={32} className="lg:w-10 lg:h-10" />
+              <ShoppingCart size={32} className="lg:w-10 lg:h-10" style={{ color: '#DCBF98' }} />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-7 h-7 lg:w-9 lg:h-9 flex items-center justify-center font-bold text-sm lg:text-base shadow-lg animate-pulse">
+                <span
+                  className="absolute -top-2 -right-2 rounded-full flex items-center justify-center font-bold text-sm lg:text-base shadow-lg animate-pulse"
+                  style={{
+                    backgroundColor: '#DCBF98',
+                    color: '#2f0f24',
+                    width: '1.75rem',
+                    height: '1.75rem',
+                  }}
+                >
                   {totalItems}
                 </span>
               )}
@@ -49,8 +57,9 @@ export default function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMobileMenu}
-            className="md:hidden text-white"
+            className="md:hidden"
             aria-label="Toggle menu"
+            style={{ color: '#DCBF98' }}
           >
             {isMobileMenuOpen ? <X size={32} /> : <Menu size={32} />}
           </button>
@@ -64,13 +73,15 @@ export default function Header() {
           onClick={toggleMobileMenu}
         >
           <div
-            className="fixed right-0 top-0 h-full w-72 bg-gradient-to-b from-amber-700 to-orange-700 shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto"
+            className="fixed right-0 top-0 h-full w-72 shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto"
+            style={{ backgroundColor: '#2f0f24', color: '#DCBF98' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 pt-14">
               <button
                 onClick={toggleMobileMenu}
-                className="absolute top-6 right-6 text-white"
+                className="absolute top-6 right-6"
+                style={{ color: '#DCBF98' }}
               >
                 <X size={32} />
               </button>
@@ -79,21 +90,24 @@ export default function Header() {
                 <Link
                   href="/menu"
                   onClick={toggleMobileMenu}
-                  className="text-2xl font-medium hover:text-amber-200 transition text-center"
+                  className="text-2xl font-medium text-center transition"
+                  style={{ color: '#DCBF98' }}
                 >
                   Menu
                 </Link>
                 <Link
                   href="/menu#special"
                   onClick={toggleMobileMenu}
-                  className="text-2xl font-medium hover:text-amber-200 transition text-center"
+                  className="text-2xl font-medium text-center transition"
+                  style={{ color: '#DCBF98' }}
                 >
                   Today's Special
                 </Link>
                 <Link
                   href="/menu#combos"
                   onClick={toggleMobileMenu}
-                  className="text-2xl font-medium hover:text-amber-200 transition text-center"
+                  className="text-2xl font-medium text-center transition"
+                  style={{ color: '#DCBF98' }}
                 >
                   Combos
                 </Link>
@@ -102,12 +116,22 @@ export default function Header() {
                 <Link
                   href="/cart"
                   onClick={toggleMobileMenu}
-                  className="flex flex-col items-center gap-3 py-4 bg-white/10 rounded-xl hover:bg-white/20 transition"
+                  className="flex flex-col items-center gap-3 py-4 rounded-xl transition"
+                  style={{ backgroundColor: '#DCBF98', color: '#2f0f24' }}
                 >
                   <div className="relative">
                     <ShoppingCart size={48} />
                     {totalItems > 0 && (
-                      <span className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center font-bold text-lg shadow-lg animate-pulse border-2 border-white">
+                      <span
+                        className="absolute -top-3 -right-3 rounded-full flex items-center justify-center font-bold text-lg shadow-lg animate-pulse border-2"
+                        style={{
+                          backgroundColor: '#DCBF98',
+                          color: '#2f0f24',
+                          width: '2.5rem',
+                          height: '2.5rem',
+                          borderColor: '#2f0f24',
+                        }}
+                      >
                         {totalItems}
                       </span>
                     )}
