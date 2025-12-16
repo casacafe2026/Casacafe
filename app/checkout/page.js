@@ -11,7 +11,7 @@ export default function Checkout() {
   const router = useRouter()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [table, setTable] = useState('')  // ← Blank by default
+  const [table, setTable] = useState('')
   const [loading, setLoading] = useState(false)
   const [orderSuccess, setOrderSuccess] = useState(false)
 
@@ -60,10 +60,10 @@ export default function Checkout() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-5xl lg:text-7xl font-extrabold text-amber-900 mb-8">
+          <h1 className="text-5xl lg:text-7xl font-extrabold text-black mb-8">
             Order Placed Successfully!
           </h1>
-          <p className="text-2xl lg:text-3xl text-gray-700 mb-12">
+          <p className="text-2xl lg:text-3xl text-black mb-12">
             Thank you for your order. Our team is preparing it with love. We'll notify you when it's ready!
           </p>
           <Link
@@ -80,44 +80,44 @@ export default function Checkout() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-stone-100 to-amber-50 py-12 lg:py-20 px-6">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-5xl lg:text-7xl font-thin text-center text-amber-900 mb-12 tracking-widest uppercase">
+        <h1 className="text-5xl lg:text-7xl font-thin text-center text-black mb-12 tracking-widest uppercase">
           Checkout
         </h1>
 
         <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
           <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <label className="block text-xl lg:text-2xl font-medium text-gray-800 mb-3">Your Name</label>
+              <label className="block text-xl lg:text-2xl font-medium text-black mb-3">Your Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Enter your name"
                 required
-                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition"
+                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition text-black"
               />
             </div>
 
             <div>
-              <label className="block text-xl lg:text-2xl font-medium text-gray-800 mb-3">Phone Number</label>
+              <label className="block text-xl lg:text-2xl font-medium text-black mb-3">Phone Number</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="Enter your phone number"
                 required
-                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition"
+                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition text-black"
               />
             </div>
 
             {/* Table Number — Only for Dine-In */}
             {!isTakeaway && (
               <div>
-                <label className="block text-xl lg:text-2xl font-medium text-gray-800 mb-3">Table Number</label>
+                <label className="block text-xl lg:text-2xl font-medium text-black mb-3">Table Number</label>
                 <select
                   value={table}
                   onChange={e => setTable(e.target.value)}
-                  className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition bg-white"
+                  className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition bg-white text-black"
                   required={!isTakeaway}
                 >
                   <option value="" disabled>
@@ -134,11 +134,10 @@ export default function Checkout() {
 
             {/* Order Summary */}
             <div className="bg-amber-50 rounded-2xl p-6 lg:p-8">
-              <p className="text-xl lg:text-2xl font-medium text-gray-800 mb-4">
-                Order Type: <span className="font-bold text-amber-700">{isTakeaway ? 'Takeaway' : 'Dine-In'}</span>
+              <p className="text-xl lg:text-2xl font-medium text-black mb-4">
+                Order Type: <span className="font-bold text-black">{isTakeaway ? 'Takeaway' : 'Dine-In'}</span>
               </p>
-              {isTakeaway && <p className="text-lg text-gray-600 mb-4">+ ₹10 packaging fee included</p>}
-              <p className="text-3xl lg:text-4xl font-bold text-amber-900">
+              <p className="text-3xl lg:text-4xl font-bold text-black">
                 Total: ₹{totalPrice.toFixed(0)}
               </p>
             </div>

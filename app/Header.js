@@ -4,25 +4,35 @@ import { useCart } from './cart-context'
 import Link from 'next/link'
 import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 export default function Header() {
   const { totalItems } = useCart()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
 
+  // Decide sidebar side based on route
+  const sidebarPosition = pathname === '/' ? 'left-0' : 'right-0'
+
   return (
-    <header className="sticky top-0 z-50 shadow-2xl" style={{ backgroundColor: '#2f0f24', color: '#DCBF98' }}>
+    <header
+      className="sticky top-0 z-50 shadow-2xl"
+      style={{ backgroundColor: '#2f0f24', color: '#DCBF98' }}
+    >
       <div className="max-w-7xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
-          {/* Logo / Brand Name - top left, premium font */}
-          <Link
-            href="/"
-            className="text-3xl sm:text-4xl font-bold tracking-wide"
-            style={{ fontFamily: 'Playfair Display, serif', color: '#DCBF98' }}
-          >
-            CASA CAFE
-          </Link>
+          {/* Logo / Brand Name - hide on landing page */}
+          {pathname !== '/' && (
+            <Link
+              href="/"
+              className="text-3xl sm:text-4xl font-bold tracking-wide"
+              style={{ fontFamily: 'Inter, sans-serif', color: '#DCBF98' }}
+            >
+              CASA CAFE
+            </Link>
+          )}
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8 lg:gap-10 text-lg lg:text-xl font-medium">
@@ -73,7 +83,7 @@ export default function Header() {
           onClick={toggleMobileMenu}
         >
           <div
-            className="fixed right-0 top-0 h-full w-72 shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto"
+            className={`fixed ${sidebarPosition} top-0 h-full w-72 shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto`}
             style={{ backgroundColor: '#2f0f24', color: '#DCBF98' }}
             onClick={(e) => e.stopPropagation()}
           >
