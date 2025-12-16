@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import MenuItem from '../MenuItem'
+import FloatingCart from '../FloatingCart'  // ← Floating cart
 
 export default function MenuPage() {
   const [categories, setCategories] = useState([])
@@ -52,9 +53,9 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-red-50 to-orange-50">
-      {/* TOP HORIZONTAL SCROLLABLE CATEGORIES — KFC/DOMINO'S STYLE */}
-      <div className="bg-white shadow-lg sticky top-0 z-30">
+    <div className="min-h-screen bg-gradient-to-b from-red-50 to-orange-50 relative">
+      {/* TOP HORIZONTAL CATEGORIES — VISIBLE BY DEFAULT ON ALL DEVICES */}
+      <div className="bg-white shadow-lg sticky top-0 z-40">
         <div className="overflow-x-auto scrollbar-hide px-4 py-4">
           <div className="flex gap-4 min-w-max">
             {categories.map(cat => (
@@ -75,7 +76,7 @@ export default function MenuPage() {
       </div>
 
       {/* MAIN ITEMS GRID */}
-      <div className="px-4 py-8 lg:py-12">
+      <div className="px-4 py-8 lg:py-12 pb-32">  {/* Extra bottom padding for floating cart */}
         <h1 className="text-4xl lg:text-6xl font-black text-center text-red-700 mb-8 lg:mb-12 uppercase tracking-wide">
           {selectedCategory?.name || 'Our Menu'}
         </h1>
@@ -91,9 +92,10 @@ export default function MenuPage() {
             ))}
           </div>
         )}
-        
       </div>
+
+      {/* FLOATING CART — VISIBLE ON MENU PAGE */}
+      <FloatingCart />
     </div>
-    
   )
 }
