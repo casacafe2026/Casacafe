@@ -2,6 +2,8 @@
 import { supabase } from './lib/supabase'
 import MenuItem from './MenuItem'
 import Link from 'next/link'
+import Image from 'next/image'
+import FloatingCart from './FloatingCart'  // ← Floating cart component
 
 export default async function Home() {
   const { data: categories } = await supabase
@@ -30,33 +32,57 @@ export default async function Home() {
     .filter(item => item.is_special) || []
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50">
-      {/* HERO */}
+    <main className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-amber-950 text-white">
+      {/* LUXURY HERO SECTION */}
       <section className="relative h-screen flex items-center justify-center text-center px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-amber-700/95 to-orange-800/95" />
+        <div className="absolute inset-0">
+          <Image
+            src="/hero-cafe.jpg"  // Your luxury cafe photo in public/
+            alt="CASA CAFÉ Interior"
+            fill
+            className="object-cover brightness-75"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-amber-900/40 to-black/60" />
+        </div>
+
         <div className="relative z-10 max-w-5xl mx-auto">
-          <h1 className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-extrabold tracking-tight text-white mb-6 drop-shadow-2xl">
-            CASA CAFÉ
+          {/* Luxury Brand Logo */}
+          <div className="mb-10">
+            <div className="relative w-56 h-56 xs:w-64 xs:h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 mx-auto">
+              <Image
+                src="/logo.png"  // Your elegant logo in public/logo.png
+                alt="CASA CAFÉ"
+                fill
+                className="object-contain drop-shadow-2xl"
+                priority
+              />
+            </div>
+          </div>
+
+          <h1 className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-thin tracking-widest text-white mb-6 drop-shadow-2xl uppercase">
+            Casa Café
           </h1>
-          <p className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-amber-100 font-medium mb-10 md:mb-14 drop-shadow-lg tracking-wide">
-            Fresh • Fast • Delicious
+          <p className="text-xl xs:text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-amber-200 font-light mb-12 drop-shadow-lg tracking-wide italic">
+            Where Elegance Meets Flavor
           </p>
+
           <Link
             href="/menu"
-            className="inline-block bg-white text-amber-800 px-10 py-5 sm:px-16 sm:py-7 md:px-20 md:py-10 rounded-full text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-300"
+            className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-12 py-6 sm:px-20 sm:py-8 md:px-24 md:py-10 rounded-full text-2xl sm:text-3xl md:text-4xl font-light tracking-wider shadow-2xl hover:shadow-3xl hover:scale-105 transition-all duration-500 border-2 border-white/30"
           >
-            VIEW MENU
+            Discover the Menu
           </Link>
         </div>
       </section>
 
       {/* TODAY'S SPECIAL */}
       {specialItems.length > 0 && (
-        <section className="py-16 sm:py-24 px-6 bg-gradient-to-r from-amber-700 to-orange-700">
-          <h2 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold text-center text-white mb-12 sm:mb-16 drop-shadow-2xl tracking-tight">
-            TODAY'S SPECIAL
+        <section className="py-20 sm:py-32 px-6 bg-gradient-to-r from-amber-900 to-amber-800">
+          <h2 className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-thin text-center text-white mb-16 sm:mb-24 drop-shadow-2xl tracking-widest uppercase">
+            Today's Masterpiece
           </h2>
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12 max-w-7xl mx-auto">
             {specialItems.map(item => (
               <MenuItem key={item.id} item={item} />
             ))}
@@ -64,9 +90,9 @@ export default async function Home() {
         </section>
       )}
 
-      {/* CATEGORIES + ITEMS ON LANDING */}
-      <section className="py-16 sm:py-24 px-6">
-        <div className="max-w-7xl mx-auto space-y-24 sm:space-y-32">
+      {/* CATEGORIES PREVIEW */}
+      <section className="py-20 sm:py-32 px-6 bg-stone-50">
+        <div className="max-w-7xl mx-auto space-y-32 sm:space-y-48">
           {categories?.map(category => {
             const regularItems = category.items?.filter(i => !i.is_special) || []
 
@@ -74,11 +100,11 @@ export default async function Home() {
 
             return (
               <div key={category.id}>
-                <h3 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-extrabold text-center text-amber-900 mb-12 sm:mb-16 tracking-tight">
-                  {category.name.toUpperCase()}
+                <h3 className="text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-thin text-center text-amber-900 mb-16 sm:mb-24 tracking-widest uppercase">
+                  {category.name}
                 </h3>
-                <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 md:gap-10">
-                  {regularItems.map(item => (
+                <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 sm:gap-12 md:gap-16">
+                  {regularItems.slice(0, 6).map(item => (
                     <MenuItem key={item.id} item={item} />
                   ))}
                 </div>
@@ -88,14 +114,8 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* FLOATING CART */}
-      <Link
-        href="/cart"
-        className="fixed bottom-6 right-6 bg-amber-700 text-white w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-2xl flex items-center justify-center text-2xl sm:text-3xl font-bold z-50 hover:scale-110 hover:bg-amber-800 transition-all duration-300"
-      >
-        <span className="hidden xs:inline">Cart</span>
-        <span className="xs:hidden">🛒</span>
-      </Link>
+      {/* FLOATING CART — VISIBLE ON THIS PAGE */}
+      <FloatingCart />
     </main>
   )
 }

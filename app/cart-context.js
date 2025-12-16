@@ -6,6 +6,7 @@ const CartContext = createContext()
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([])
+  const [takeawayFee, setTakeawayFee] = useState(0)  // 0 = Dine-in, 1000 = Takeaway (in paise)
 
   const addToCart = (item, variant) => {
     setCart(prev => {
@@ -27,11 +28,26 @@ export function CartProvider({ children }) {
 
   const clearCart = () => setCart([])
 
+  // Cart calculations
   const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0)
-  const totalPrice = cart.reduce((sum, i) => sum + (i.variant.price / 100) * i.quantity, 0)
+
+  const subtotal = cart.reduce((sum, i) => sum + (i.variant.price / 100) * i.quantity, 0)
+
+  const totalPrice = subtotal + (takeawayFee / 100)  // Add packaging fee if takeaway
 
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, totalItems, totalPrice }}>
+    <CartContext.Provider value={{
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      totalItems,
+      totalPrice,
+      subtotal,               // Subtotal without fee
+      takeawayFee,            // Current fee (in paise)
+      setTakeawayFee,         // To toggle dine-in/takeaway
+    }}>
       {children}
     </CartContext.Provider>
   )

@@ -45,66 +45,55 @@ export default function MenuPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center">
-        <p className="text-4xl sm:text-5xl font-bold text-amber-800">Loading menu...</p>
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <p className="text-3xl font-bold text-red-600">Loading Delicious Menu...</p>
       </div>
     )
   }
 
-  const selectedItems = selectedCategory?.items || []
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <h1 className="text-5xl sm:text-7xl font-black text-center text-amber-800 mb-12 sm:mb-16">
-          CASA CAFÉ SIGNATURE MENU
-        </h1>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 sm:gap-12">
-          {/* LEFT SIDE - CATEGORIES */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 sticky top-24">
-              <h2 className="text-3xl sm:text-4xl font-bold mb-6 sm:mb-8 text-center text-amber-700">
-                Categories
-              </h2>
-              <div className="space-y-3 sm:space-y-4">
-                {categories.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`w-full py-4 sm:py-6 px-6 sm:px-8 rounded-2xl text-xl sm:text-2xl font-bold transition-all shadow-md ${
-                      selectedCategory?.id === cat.id
-                        ? 'bg-amber-600 text-white shadow-lg scale-105'
-                        : 'bg-amber-100 hover:bg-amber-200 text-amber-800'
-                    }`}
-                  >
-                    {cat.name.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT SIDE - ITEMS */}
-          <div className="lg:col-span-3">
-            <h2 className="text-4xl sm:text-6xl font-black text-center mb-12 sm:mb-16 text-amber-700">
-              {selectedCategory?.name.toUpperCase() || 'Select a category'}
-            </h2>
-
-            {selectedItems.length === 0 ? (
-              <div className="text-center py-20 sm:py-32">
-                <p className="text-3xl sm:text-4xl text-gray-600">No items in this category yet</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 sm:gap-12">
-                {selectedItems.map(item => (
-                  <MenuItem key={item.id} item={item} />
-                ))}
-              </div>
-            )}
+    <div className="min-h-screen bg-gradient-to-b from-red-50 to-orange-50">
+      {/* TOP HORIZONTAL SCROLLABLE CATEGORIES — KFC/DOMINO'S STYLE */}
+      <div className="bg-white shadow-lg sticky top-0 z-30">
+        <div className="overflow-x-auto scrollbar-hide px-4 py-4">
+          <div className="flex gap-4 min-w-max">
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-8 py-4 rounded-full text-lg font-bold whitespace-nowrap transition-all duration-300 ${
+                  selectedCategory?.id === cat.id
+                    ? 'bg-red-600 text-white shadow-xl scale-110'
+                    : 'bg-gray-100 text-gray-800 hover:bg-red-100'
+                }`}
+              >
+                {cat.name.toUpperCase()}
+              </button>
+            ))}
           </div>
         </div>
       </div>
+
+      {/* MAIN ITEMS GRID */}
+      <div className="px-4 py-8 lg:py-12">
+        <h1 className="text-4xl lg:text-6xl font-black text-center text-red-700 mb-8 lg:mb-12 uppercase tracking-wide">
+          {selectedCategory?.name || 'Our Menu'}
+        </h1>
+
+        {selectedCategory?.items?.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-2xl text-gray-600 font-medium">No items yet — coming soon!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 lg:gap-10">
+            {selectedCategory?.items?.map(item => (
+              <MenuItem key={item.id} item={item} />
+            ))}
+          </div>
+        )}
+        
+      </div>
     </div>
+    
   )
 }

@@ -1,79 +1,76 @@
 // app/checkout/page.js
 'use client'
-import { useState } from 'react'
 import { useCart } from '../cart-context'
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-export default function CheckoutPage() {
-  const { cart, totalPrice, clearCart } = useCart()
-  const [tableNumber, setTableNumber] = useState('')
-  const [customerName, setCustomerName] = useState('')
+export default function Checkout() {
+  const { cart, totalPrice, takeawayFee, clearCart } = useCart()
+  const router = useRouter()
+  const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [table, setTable] = useState('')  // ← Blank by default
   const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [orderSuccess, setOrderSuccess] = useState(false)
+
+  const isTakeaway = takeawayFee > 0
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
-    // VALIDATION — ALL FIELDS REQUIRED
-    if (!tableNumber.trim()) {
-      alert('Please enter table number')
-      return
-    }
-    if (!customerName.trim()) {
-      alert('Please enter your name')
-      return
-    }
-    if (!phone.trim()) {
-      alert('Please enter your phone number')
-      return
-    }
-    if (phone.length < 10) {
-      alert('Phone number should be at least 10 digits')
-      return
-    }
-
     setLoading(true)
 
-    const orderData = {
-      total_amount: Math.round(totalPrice * 100),
-      status: 'pending',
-      address: {
-        table: tableNumber.trim(),
-        name: customerName.trim(),
-        phone: phone.trim()
-      },
-      items: cart.map(entry => ({
-        item_id: entry.item.id,
-        name: entry.item.name,
-        variant: entry.variant,
-        quantity: entry.quantity,
-        price: entry.variant.price
-      })),
-      created_at: new Date().toISOString()
-    }
+    const orderItems = cart.map(i => ({
+      quantity: i.quantity,
+      name: i.item.name,
+      variant: {
+        size: i.variant.size || null,
+        variant: i.variant.variant || null,
+        price: i.variant.price
+      }
+    }))
 
-    const { error } = await supabase.from('orders').insert(orderData)
+    const { error } = await supabase.from('orders').insert({
+      items: orderItems,
+      total_amount: totalPrice * 100,
+      address: {
+        name,
+        phone,
+        table: isTakeaway ? null : table || null
+      },
+      status: 'pending'
+    })
 
     if (error) {
       alert('Order failed: ' + error.message)
     } else {
-      setSuccess(true)
       clearCart()
+      setOrderSuccess(true)
     }
     setLoading(false)
   }
 
-  if (success) {
+  if (orderSuccess) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center p-6">
-        <div className="bg-white p-16 rounded-3xl shadow-2xl text-center max-w-2xl">
-          <h1 className="text-6xl font-black text-green-600 mb-8">Order Sent! 🎉</h1>
-          <p className="text-3xl mb-8">Thank you, {customerName}!</p>
-          <p className="text-2xl mb-12">Table {tableNumber} — our staff will bring it soon.</p>
-          <Link href="/" className="bg-amber-600 text-white px-20 py-8 rounded-3xl text-4xl font-bold hover:bg-amber-700">
-            Order More
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center px-6 py-20">
+        <div className="text-center max-w-2xl">
+          <div className="mb-12">
+            <svg className="w-32 h-32 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-5xl lg:text-7xl font-extrabold text-amber-900 mb-8">
+            Order Placed Successfully!
+          </h1>
+          <p className="text-2xl lg:text-3xl text-gray-700 mb-12">
+            Thank you for your order. Our team is preparing it with love. We'll notify you when it's ready!
+          </p>
+          <Link
+            href="/"
+            className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-16 py-6 rounded-full text-2xl lg:text-3xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300"
+          >
+            Back to Home
           </Link>
         </div>
       </div>
@@ -81,75 +78,79 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 py-20 px-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-6xl font-black text-center mb-16">Checkout</h1>
+    <div className="min-h-screen bg-gradient-to-b from-stone-100 to-amber-50 py-12 lg:py-20 px-6">
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-5xl lg:text-7xl font-thin text-center text-amber-900 mb-12 tracking-widest uppercase">
+          Checkout
+        </h1>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-12">
-          <h2 className="text-4xl font-bold mb-8">Your Order</h2>
-          <div className="space-y-6 mb-12">
-            {cart.map(entry => (
-              <div key={entry.key} className="flex justify-between text-2xl">
-                <span>{entry.item.name} × {entry.quantity}</span>
-                <span>₹{((entry.variant.price / 100) * entry.quantity).toFixed(0)}</span>
-              </div>
-            ))}
-            <div className="border-t-4 border-amber-200 pt-6 text-4xl font-black text-right">
-              Total: ₹{totalPrice.toFixed(0)}
-            </div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-10">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
+          <form onSubmit={handleSubmit} className="space-y-8">
             <div>
-              <label className="block text-3xl font-bold mb-4">Table Number *</label>
+              <label className="block text-xl lg:text-2xl font-medium text-gray-800 mb-3">Your Name</label>
               <input
                 type="text"
-                value={tableNumber}
-                onChange={e => setTableNumber(e.target.value)}
-                placeholder="e.g. Table 5"
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Enter your name"
                 required
-                className="w-full px-8 py-6 border-4 border-amber-200 rounded-3xl text-3xl text-center focus:border-amber-600 outline-none"
+                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition"
               />
             </div>
 
             <div>
-              <label className="block text-3xl font-bold mb-4">Your Name *</label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={e => setCustomerName(e.target.value)}
-                placeholder="e.g. John"
-                required
-                className="w-full px-8 py-6 border-4 border-amber-200 rounded-3xl text-3xl text-center focus:border-amber-600 outline-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-3xl font-bold mb-4">Phone Number *</label>
+              <label className="block text-xl lg:text-2xl font-medium text-gray-800 mb-3">Phone Number</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                placeholder="e.g. 9876543210"
+                placeholder="Enter your phone number"
                 required
-                className="w-full px-8 py-6 border-4 border-amber-200 rounded-3xl text-3xl text-center focus:border-amber-600 outline-none"
+                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition"
               />
+            </div>
+
+            {/* Table Number — Only for Dine-In */}
+            {!isTakeaway && (
+              <div>
+                <label className="block text-xl lg:text-2xl font-medium text-gray-800 mb-3">Table Number</label>
+                <select
+                  value={table}
+                  onChange={e => setTable(e.target.value)}
+                  className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition bg-white"
+                  required={!isTakeaway}
+                >
+                  <option value="" disabled>
+                    Please select your table
+                  </option>
+                  <option value="1">Table 1</option>
+                  <option value="2">Table 2</option>
+                  <option value="3">Table 3</option>
+                  <option value="4">Table 4</option>
+                  <option value="5">Table 5</option>
+                </select>
+              </div>
+            )}
+
+            {/* Order Summary */}
+            <div className="bg-amber-50 rounded-2xl p-6 lg:p-8">
+              <p className="text-xl lg:text-2xl font-medium text-gray-800 mb-4">
+                Order Type: <span className="font-bold text-amber-700">{isTakeaway ? 'Takeaway' : 'Dine-In'}</span>
+              </p>
+              {isTakeaway && <p className="text-lg text-gray-600 mb-4">+ ₹10 packaging fee included</p>}
+              <p className="text-3xl lg:text-4xl font-bold text-amber-900">
+                Total: ₹{totalPrice.toFixed(0)}
+              </p>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-10 rounded-3xl text-5xl font-black shadow-2xl disabled:opacity-70"
+              className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 disabled:opacity-70 disabled:cursor-not-allowed text-white py-6 rounded-full text-2xl lg:text-3xl font-medium shadow-2xl hover:shadow-3xl transition-all duration-300"
             >
-              {loading ? 'Sending...' : 'CALL WAITER'}
+              {loading ? 'Placing Order...' : 'Confirm & Place Order'}
             </button>
           </form>
-
-          <div className="text-center mt-12">
-            <Link href="/menu" className="text-3xl text-amber-600 hover:text-amber-800 underline">
-              ← Add more items
-            </Link>
-          </div>
         </div>
       </div>
     </div>

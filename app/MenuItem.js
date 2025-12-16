@@ -10,7 +10,6 @@ export default function MenuItem({ item }) {
 
   if (!item.item_variants || item.item_variants.length === 0) return null
 
-  // Auto select default variant on load
   useEffect(() => {
     const defaultVariant = item.item_variants.find(v => v.is_default) || item.item_variants[0]
     setSelectedVariant(defaultVariant)
@@ -20,59 +19,56 @@ export default function MenuItem({ item }) {
   const currentPrice = selectedVariant ? (selectedVariant.price / 100).toFixed(0) : 0
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-4 border-amber-100 hover:border-amber-400 transition-all duration-300">
-      <div className="relative h-64 sm:h-72">
+    <div className="w-full">
+      {/* Perfect Square Card with Full Image Cover */}
+      <div className="aspect-square rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 group relative bg-gray-200">
         <Image
           src={item.base_image_url || 'https://images.unsplash.com/photo-1512568400610-62da28bc8a13?w=800'}
           alt={item.name}
           fill
-          className="object-cover"
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+          sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
           unoptimized
         />
+
+        {/* Special Badge */}
         {item.is_special && (
-          <div className="absolute top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-full font-black text-lg sm:text-xl shadow-lg">
-            SPECIAL
+          <div className="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-pink-600 text-white px-6 py-3 rounded-full font-bold text-sm uppercase tracking-wider shadow-xl">
+            Special
           </div>
         )}
       </div>
 
-      <div className="p-6 sm:p-8">
-        <h3 className="text-2xl sm:text-3xl font-black text-center mb-4 text-gray-800">
+      {/* Content Below — Perfectly Centered */}
+      <div className="mt-6 text-center">
+        <h3 className="text-lg font-bold text-gray-800 mb-3 line-clamp-2 leading-tight">
           {item.name}
         </h3>
 
-        {/* Variant Dropdown — only if multiple variants */}
         {hasMultipleVariants && (
-          <div className="mb-6 sm:mb-8">
-            <label className="block text-lg sm:text-xl font-bold text-gray-700 mb-3 text-center">
-              Choose Variant
-            </label>
-            <select
-              value={selectedVariant?.id || ''}
-              onChange={(e) => {
-                const variant = item.item_variants.find(v => v.id === Number(e.target.value))
-                setSelectedVariant(variant)
-              }}
-              className="w-full px-6 py-4 border-4 border-amber-200 rounded-2xl text-lg sm:text-xl font-bold text-center focus:border-amber-600 outline-none bg-amber-50 transition"
-            >
-              {item.item_variants.map(v => (
-                <option key={v.id} value={v.id}>
-                  {v.size && `${v.size} `}{v.variant && `${v.variant} `}— ₹{(v.price / 100).toFixed(0)}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={selectedVariant?.id || ''}
+            onChange={(e) => {
+              const variant = item.item_variants.find(v => v.id === Number(e.target.value))
+              setSelectedVariant(variant)
+            }}
+            className="mb-4 px-4 py-2 rounded-full bg-amber-100 text-gray-700 text-sm font-medium border border-amber-300 focus:outline-none focus:border-amber-600 transition w-full max-w-xs"
+          >
+            {item.item_variants.map(v => (
+              <option key={v.id} value={v.id}>
+                {v.size && `${v.size} `}{v.variant && v.variant} — ₹{(v.price / 100).toFixed(0)}
+              </option>
+            ))}
+          </select>
         )}
 
-        {/* Price */}
-        <p className="text-3xl sm:text-4xl font-black text-center text-amber-600 mb-6 sm:mb-8">
+        <p className="text-2xl font-extrabold text-amber-700 mb-5">
           ₹{currentPrice}
         </p>
 
-        {/* Add to Cart Button */}
         <button
           onClick={() => addToCart(item, selectedVariant)}
-          className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white py-5 sm:py-6 rounded-2xl text-2xl sm:text-3xl font-black shadow-2xl transition transform hover:scale-105 active:scale-100"
+          className="w-full max-w-xs bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white py-3 px-8 rounded-full text-base font-bold tracking-wide shadow-lg hover:shadow-xl transition-all duration-300"
         >
           Add to Cart
         </button>
