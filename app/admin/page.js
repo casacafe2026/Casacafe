@@ -1,9 +1,9 @@
+// app/admin/page.js
 'use client'
-
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useRouter } from 'next/navigation'
-import { Plus, Edit2, Trash2, X, Save, Star, LogOut } from 'lucide-react'
+import { Plus, Edit2, Trash2, X, Save, Star, LogOut, Bell } from 'lucide-react'
 import Image from 'next/image'
 
 export default function AdminPanel() {
@@ -11,7 +11,11 @@ export default function AdminPanel() {
   const [activeTab, setActiveTab] = useState('orders')
   const [orders, setOrders] = useState([])
   const [categories, setCategories] = useState([])
+  const [allItems, setAllItems] = useState([])
+  const [specialItems, setSpecialItems] = useState([])
+  const [combos, setCombos] = useState([])
   const [user, setUser] = useState(null)
+  const [newOrderCount, setNewOrderCount] = useState(0)
 
   // Form States
   const [catName, setCatName] = useState('')
@@ -28,6 +32,24 @@ export default function AdminPanel() {
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
 
+  // Today's Special States
+  const [showSpecialModal, setShowSpecialModal] = useState(false)
+  const [editingSpecialItem, setEditingSpecialItem] = useState(null)
+  const [specialName, setSpecialName] = useState('')
+  const [specialPrice, setSpecialPrice] = useState('')
+  const [specialImageFile, setSpecialImageFile] = useState(null)
+  const [specialImagePreview, setSpecialImagePreview] = useState('')
+
+  // Combo States
+  const [showComboModal, setShowComboModal] = useState(false)
+  const [editingCombo, setEditingCombo] = useState(null)
+  const [comboName, setComboName] = useState('')
+  const [comboDesc, setComboDesc] = useState('')
+  const [comboPrice, setComboPrice] = useState('')
+  const [comboImageFile, setComboImageFile] = useState(null)
+  const [comboImagePreview, setComboImagePreview] = useState('')
+  const [selectedComboItems, setSelectedComboItems] = useState([])
+
   // Modal States
   const [showPayConfirm, setShowPayConfirm] = useState(null)
   const [showPaidSuccess, setShowPaidSuccess] = useState(false)
@@ -41,6 +63,9 @@ export default function AdminPanel() {
         setUser(user)
         fetchOrders()
         fetchCategories()
+        fetchAllItems()
+        fetchSpecialItems()
+        fetchCombos()
       }
     }
     checkUser()
@@ -49,14 +74,20 @@ export default function AdminPanel() {
       if (!session) router.push('/admin/login')
     })
 
-    // REALTIME ORDERS + NOTIFICATION SOUND
+    // REALTIME ORDERS - Reliable sound + badge
     const channel = supabase
       .channel('orders-channel')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
-        setOrders(prev => [payload.new, ...prev])
-        const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3')
-        audio.play().catch(() => {})
-        alert('New order received!')
+        const newOrder = payload.new
+        setOrders(prev => [newOrder, ...prev])
+
+        // Play a reliable, short notification chime
+        const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/24/audio_4e54e4f9b9.mp3?filename=ding-36030.mp3')
+        audio.volume = 0.7
+        audio.play().catch(e => console.log('Sound play failed:', e))
+
+        // Update badge
+        updateNewOrderCount()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
         fetchOrders()
@@ -75,6 +106,12 @@ export default function AdminPanel() {
       .select('*')
       .order('created_at', { ascending: false })
     setOrders(data || [])
+    updateNewOrderCount()
+  }
+
+  const updateNewOrderCount = () => {
+    const pending = orders.filter(o => o.status === 'pending' || o.status === 'preparing').length
+    setNewOrderCount(pending)
   }
 
   const fetchCategories = async () => {
@@ -83,6 +120,21 @@ export default function AdminPanel() {
       .select('*, items(*, item_variants(*))')
       .order('display_order')
     setCategories(data || [])
+  }
+
+  const fetchAllItems = async () => {
+    const { data } = await supabase.from('items').select('id, name, is_special')
+    setAllItems(data || [])
+  }
+
+  const fetchSpecialItems = async () => {
+    const { data } = await supabase.from('today_special').select('*')
+    setSpecialItems(data || [])
+  }
+
+  const fetchCombos = async () => {
+    const { data } = await supabase.from('combos').select('*')
+    setCombos(data || [])
   }
 
   const updateStatus = async (id, status) => {
@@ -218,6 +270,148 @@ export default function AdminPanel() {
     setVariants(newV)
   }
 
+  const openSpecialModal = (item = null) => {
+    if (item) {
+      setEditingSpecialItem(item)
+      setSpecialName(item.name)
+      setSpecialPrice((item.price / 100).toFixed(0))
+      setSpecialImagePreview(item.base_image_url || '')
+    } else {
+      setEditingSpecialItem(null)
+      setSpecialName('')
+      setSpecialPrice('')
+      setSpecialImagePreview('')
+      setSpecialImageFile(null)
+    }
+    setShowSpecialModal(true)
+  }
+
+  const saveSpecialItem = async () => {
+    if (!specialName.trim() || !specialPrice) {
+      alert('Please enter name and price')
+      return
+    }
+
+    let imageUrl = specialImagePreview
+    if (specialImageFile) {
+      const fileName = `special-${Date.now()}.jpg`
+      const { error } = await supabase.storage
+        .from('menu-images')
+        .upload(fileName, specialImageFile, { upsert: true })
+      if (error) {
+        alert('Image upload failed')
+        return
+      }
+      const { data } = supabase.storage.from('menu-images').getPublicUrl(fileName)
+      imageUrl = data.publicUrl
+    }
+
+    const payload = {
+      name: specialName.trim(),
+      price: parseInt(specialPrice) * 100,
+      base_image_url: imageUrl || null
+    }
+
+    if (editingSpecialItem) {
+      await supabase.from('today_special').update(payload).eq('id', editingSpecialItem.id)
+    } else {
+      await supabase.from('today_special').insert(payload)
+    }
+
+    setShowSpecialModal(false)
+    setSpecialName('')
+    setSpecialPrice('')
+    setSpecialImageFile(null)
+    setSpecialImagePreview('')
+    setEditingSpecialItem(null)
+    fetchSpecialItems()
+    alert('Special item saved!')
+  }
+
+  const deleteSpecialItem = async (id) => {
+    if (!confirm('Delete this special item?')) return
+    await supabase.from('today_special').delete().eq('id', id)
+    fetchSpecialItems()
+  }
+
+  const toggleExistingSpecial = async (itemId, current) => {
+    await supabase.from('items').update({ is_special: !current }).eq('id', itemId)
+    fetchCategories()
+    fetchAllItems()
+  }
+
+  const openComboModal = (combo = null) => {
+    if (combo) {
+      setEditingCombo(combo)
+      setComboName(combo.name)
+      setComboDesc(combo.description || '')
+      setComboPrice((combo.price / 100).toFixed(0))
+      setComboImagePreview(combo.base_image_url || '')
+      setSelectedComboItems(combo.item_ids || [])
+    } else {
+      setEditingCombo(null)
+      setComboName('')
+      setComboDesc('')
+      setComboPrice('')
+      setComboImagePreview('')
+      setComboImageFile(null)
+      setSelectedComboItems([])
+    }
+    setShowComboModal(true)
+  }
+
+  const saveCombo = async () => {
+    if (!comboName.trim() || !comboPrice || selectedComboItems.length === 0) {
+      alert('Please fill name, price and select at least one item')
+      return
+    }
+
+    let imageUrl = comboImagePreview
+    if (comboImageFile) {
+      const fileName = `combo-${Date.now()}.jpg`
+      const { error } = await supabase.storage
+        .from('menu-images')
+        .upload(fileName, comboImageFile, { upsert: true })
+      if (error) {
+        alert('Image upload failed')
+        return
+      }
+      const { data } = supabase.storage.from('menu-images').getPublicUrl(fileName)
+      imageUrl = data.publicUrl
+    }
+
+    const payload = {
+      name: comboName.trim(),
+      description: comboDesc || null,
+      price: parseInt(comboPrice) * 100,
+      base_image_url: imageUrl || null,
+      item_ids: selectedComboItems
+    }
+
+    if (editingCombo) {
+      await supabase.from('combos').update(payload).eq('id', editingCombo.id)
+    } else {
+      await supabase.from('combos').insert(payload)
+    }
+
+    setShowComboModal(false)
+    setComboName('')
+    setComboDesc('')
+    setComboPrice('')
+    setComboImageFile(null)
+    setComboImagePreview('')
+    setSelectedComboItems([])
+    setEditingCombo(null)
+    fetchCombos()
+    alert('Combo saved successfully!')
+  }
+
+  const deleteCombo = async (id) => {
+    if (!confirm('Delete combo permanently?')) return
+    await supabase.from('combos').delete().eq('id', id)
+    fetchCombos()
+  }
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/admin/login')
@@ -230,7 +424,7 @@ export default function AdminPanel() {
       {/* ADMIN HEADER */}
       <div className="bg-gradient-to-r from-amber-700 to-amber-900 text-white p-4 sm:p-6 shadow-2xl">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">CASA CAFE - ADMIN PANEL</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-center sm:text-left">CASA CAFÉ - ADMIN PANEL</h1>
           <button onClick={handleLogout} className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-xl font-bold flex items-center gap-2 text-lg">
             <LogOut size={20} /> Logout
           </button>
@@ -238,16 +432,37 @@ export default function AdminPanel() {
       </div>
 
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
-        {/* TABS */}
+        {/* TABS WITH RED BADGE + BELL ICON */}
         <div className="flex flex-wrap gap-3 mb-8 justify-center sm:justify-start">
-          <button onClick={() => setActiveTab('orders')} className={`px-6 py-3 rounded-xl text-lg sm:text-xl font-bold transition ${activeTab === 'orders' ? 'bg-amber-600 text-white' : 'bg-white'}`}>
+          <button 
+            onClick={() => {
+              setActiveTab('orders')
+              setNewOrderCount(0) // Clear badge on click
+            }} 
+            className={`relative px-6 py-3 rounded-xl text-lg sm:text-xl font-bold transition ${activeTab === 'orders' ? 'bg-amber-600 text-white' : 'bg-white'}`}
+          >
             Orders ({orders.length})
+            {newOrderCount > 0 && (
+              <div className="absolute -top-3 -right-3 flex items-center">
+                <span className="bg-red-600 text-white text-sm font-bold rounded-full w-9 h-9 flex items-center justify-center shadow-lg z-10 animate-pulse">
+                  {newOrderCount}
+                </span>
+                <Bell className="w-7 h-7 text-red-600 absolute -right-1 animate-ping" />
+              </div>
+            )}
           </button>
+
           <button onClick={() => setActiveTab('menu')} className={`px-6 py-3 rounded-xl text-lg sm:text-xl font-bold transition ${activeTab === 'menu' ? 'bg-amber-600 text-white' : 'bg-white'}`}>
             Menu
           </button>
           <button onClick={() => setActiveTab('bills')} className={`px-6 py-3 rounded-xl text-lg sm:text-xl font-bold transition ${activeTab === 'bills' ? 'bg-amber-600 text-white' : 'bg-white'}`}>
             Bills
+          </button>
+          <button onClick={() => setActiveTab('special')} className={`px-6 py-3 rounded-xl text-lg sm:text-xl font-bold transition ${activeTab === 'special' ? 'bg-amber-600 text-white' : 'bg-white'}`}>
+            Today's Special
+          </button>
+          <button onClick={() => setActiveTab('combos')} className={`px-6 py-3 rounded-xl text-lg sm:text-xl font-bold transition ${activeTab === 'combos' ? 'bg-amber-600 text-white' : 'bg-white'}`}>
+            Combos
           </button>
         </div>
 
@@ -505,6 +720,105 @@ export default function AdminPanel() {
           </div>
         )}
 
+        {/* TODAY'S SPECIAL TAB */}
+        {activeTab === 'special' && (
+          <div className="space-y-12">
+            <div className="text-center">
+              <button 
+                onClick={() => openSpecialModal()}
+                className="bg-amber-600 hover:bg-amber-700 text-white px-10 py-4 rounded-full text-xl font-bold shadow-lg flex items-center gap-3 mx-auto"
+              >
+                <Plus size={24} /> Add New Special Item
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {specialItems.length === 0 ? (
+                <p className="text-center text-xl text-gray-500 col-span-full py-12">No special items yet</p>
+              ) : (
+                specialItems.map(item => (
+                  <div key={item.id} className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                    {item.base_image_url && (
+                      <div className="relative w-full h-64 mb-6 rounded-xl overflow-hidden">
+                        <Image src={item.base_image_url} alt={item.name} fill className="object-cover" unoptimized />
+                      </div>
+                    )}
+                    <h3 className="text-2xl font-bold mb-3">{item.name}</h3>
+                    <p className="text-3xl font-bold text-amber-600 mb-6">₹{(item.price / 100).toFixed(0)}</p>
+                    <div className="flex gap-4">
+                      <button onClick={() => openSpecialModal(item)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold">
+                        Edit
+                      </button>
+                      <button onClick={() => deleteSpecialItem(item.id)} className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-bold">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-xl p-8">
+              <h3 className="text-2xl font-bold text-center mb-8">Feature Existing Menu Items</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {allItems.map(item => (
+                  <div key={item.id} className="bg-gray-50 rounded-xl p-5 text-center">
+                    <p className="text-xl font-medium mb-4">{item.name}</p>
+                    <button
+                      onClick={() => toggleExistingSpecial(item.id, item.is_special)}
+                      className={`px-6 py-3 rounded-full font-bold ${item.is_special ? 'bg-amber-600 text-white' : 'bg-gray-300'}`}
+                    >
+                      {item.is_special ? '★ Featured' : 'Mark as Special'}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* COMBOS TAB */}
+        {activeTab === 'combos' && (
+          <div className="space-y-12">
+            <div className="text-center">
+              <button 
+                onClick={() => openComboModal()}
+                className="bg-amber-600 hover:bg-amber-700 text-white px-10 py-4 rounded-full text-xl font-bold shadow-lg flex items-center gap-3 mx-auto"
+              >
+                <Plus size={24} /> Add New Combo
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {combos.length === 0 ? (
+                <p className="text-center text-xl text-gray-500 col-span-full py-12">No combos yet</p>
+              ) : (
+                combos.map(combo => (
+                  <div key={combo.id} className="bg-white rounded-2xl shadow-xl p-6 text-center">
+                    {combo.base_image_url && (
+                      <div className="relative w-full h-64 mb-6 rounded-xl overflow-hidden">
+                        <Image src={combo.base_image_url} alt={combo.name} fill className="object-cover" unoptimized />
+                      </div>
+                    )}
+                    <h3 className="text-2xl font-bold mb-3">{combo.name}</h3>
+                    {combo.description && <p className="text-gray-600 mb-4">{combo.description}</p>}
+                    <p className="text-3xl font-bold text-amber-600 mb-6">₹{(combo.price / 100).toFixed(0)}</p>
+                    <p className="text-sm text-gray-500 mb-6">Includes {combo.item_ids?.length || 0} items</p>
+                    <div className="flex gap-4">
+                      <button onClick={() => openComboModal(combo)} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold">
+                        Edit
+                      </button>
+                      <button onClick={() => deleteCombo(combo.id)} className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 rounded-lg font-bold">
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ITEM MODAL */}
         {showItemModal && (
           <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
@@ -571,6 +885,87 @@ export default function AdminPanel() {
                   {editingItem ? 'Update' : 'Save'}
                 </button>
                 <button onClick={() => { setShowItemModal(false); resetItemForm() }} className="bg-gray-600 text-white px-12 py-4 rounded-xl text-xl sm:text-2xl font-bold">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TODAY'S SPECIAL MODAL */}
+        {showSpecialModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+              <h2 className="text-2xl font-bold mb-6 text-center">{editingSpecialItem ? 'Edit' : 'Add'} Special Item</h2>
+              <div className="space-y-5">
+                <input value={specialName} onChange={e => setSpecialName(e.target.value)} placeholder="Item Name" className="w-full px-5 py-3 border rounded-lg text-lg" />
+                <input type="number" value={specialPrice} onChange={e => setSpecialPrice(e.target.value)} placeholder="Price ₹" className="w-full px-5 py-3 border rounded-lg text-lg" />
+                <input type="file" accept="image/*" onChange={e => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    setSpecialImageFile(file)
+                    setSpecialImagePreview(URL.createObjectURL(file))
+                  }
+                }} className="w-full" />
+                {specialImagePreview && (
+                  <div className="relative w-full h-56 rounded-lg overflow-hidden">
+                    <Image src={specialImagePreview} alt="Preview" fill className="object-cover" />
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-4 mt-8">
+                <button onClick={saveSpecialItem} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold">
+                  Save
+                </button>
+                <button onClick={() => setShowSpecialModal(false)} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-bold">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* COMBO MODAL */}
+        {showComboModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full max-h-screen overflow-y-auto">
+              <h2 className="text-2xl font-bold mb-6 text-center">{editingCombo ? 'Edit' : 'Add'} Combo</h2>
+              <div className="space-y-5">
+                <input value={comboName} onChange={e => setComboName(e.target.value)} placeholder="Combo Name" className="w-full px-5 py-3 border rounded-lg text-lg" />
+                <textarea value={comboDesc} onChange={e => setComboDesc(e.target.value)} placeholder="Description (optional)" className="w-full px-5 py-3 border rounded-lg text-lg h-24" />
+                <input type="number" value={comboPrice} onChange={e => setComboPrice(e.target.value)} placeholder="Price ₹" className="w-full px-5 py-3 border rounded-lg text-lg" />
+                <input type="file" accept="image/*" onChange={e => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    setComboImageFile(file)
+                    setComboImagePreview(URL.createObjectURL(file))
+                  }
+                }} className="w-full" />
+                {comboImagePreview && (
+                  <div className="relative w-full h-56 rounded-lg overflow-hidden">
+                    <Image src={comboImagePreview} alt="Preview" fill className="object-cover" />
+                  </div>
+                )}
+                <div>
+                  <p className="font-medium mb-3">Select Items</p>
+                  <div className="bg-gray-50 rounded-lg p-4 max-h-60 overflow-y-auto">
+                    {allItems.map(item => (
+                      <label key={item.id} className="flex items-center gap-3 py-2">
+                        <input type="checkbox" checked={selectedComboItems.includes(item.id)} onChange={e => {
+                          if (e.target.checked) setSelectedComboItems([...selectedComboItems, item.id])
+                          else setSelectedComboItems(selectedComboItems.filter(id => id !== item.id))
+                        }} className="w-5 h-5" />
+                        <span>{item.name}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-4 mt-8">
+                <button onClick={saveCombo} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold">
+                  Save Combo
+                </button>
+                <button onClick={() => setShowComboModal(false)} className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 rounded-lg font-bold">
                   Cancel
                 </button>
               </div>
