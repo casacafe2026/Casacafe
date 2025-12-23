@@ -1,127 +1,198 @@
-// app/page.js
+'use client'
+
 import { supabase } from './lib/supabase'
 import MenuItem from './MenuItem'
 import Link from 'next/link'
 import Image from 'next/image'
 import FloatingCart from './FloatingCart'
+import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
 
-export default async function Home() {
-  const { data: categories } = await supabase
-    .from('categories')
-    .select(`
-      id,
-      name,
-      items (
-        id,
-        name,
-        base_image_url,
-        is_special,
-        item_variants (
+export default function Home() {
+  const [categories, setCategories] = useState([])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await supabase
+        .from('categories')
+        .select(`
           id,
-          size,
-          variant,
-          price,
-          is_default
-        )
-      )
-    `)
-    .order('display_order')
+          name,
+          items (
+            id,
+            name,
+            description,
+            base_image_url,
+            is_special,
+            item_variants (
+              id,
+              size,
+              variant,
+              price,
+              is_default
+            )
+          )
+        `)
+        .order('display_order')
+
+      setCategories(data || [])
+    }
+
+    fetchData()
+  }, [])
 
   const specialItems =
-    categories?.flatMap(cat => cat.items || []).filter(item => item.is_special) || []
+    categories.flatMap(cat => cat.items || []).filter(item => item.is_special)
 
   return (
-    <main className="min-h-screen bg-[#2F0F24] text-[#DEBAA2]">
-      {/* TOP SECTION — Bigger Logo, Smaller Button */}
-      {/* HERO SECTION */}
-<section className="relative flex flex-col items-center justify-center px-6 pt-16 pb-24 lg:pt-24 lg:pb-32 
-  bg-gradient-to-r from-[#2F0F24] via-[#3a1a30] to-[#2F0F24] animate-[gradient_15s_ease_infinite]">
+    <>
+      {/* ================= HERO SECTION ================= */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 bg-[#fdf8f1] overflow-hidden">
 
-  {/* Radial Glow Behind Logo */}
-  <div className="absolute inset-0 flex items-center justify-center">
-    <div className="w-[30rem] h-[30rem] rounded-full bg-[#DEBAA2]/10 blur-3xl"></div>
-  </div>
+        {/* Coffee-themed SVG decorations */}
+        <svg className="absolute top-[-5%] left-[5%] w-[15vw] h-[15vw] opacity-20 animate-spin-slow" viewBox="0 0 200 200">
+          <circle cx="100" cy="100" r="100" fill="#d4af7f" />
+        </svg>
+        <svg className="absolute bottom-[-5%] right-[10%] w-[12vw] h-[12vw] opacity-20 animate-pulse-slow" viewBox="0 0 200 200">
+          <ellipse cx="100" cy="100" rx="100" ry="50" fill="#c4996c" />
+        </svg>
 
-  <div className="w-full max-w-7xl mx-auto text-center relative z-10">
-    {/* BIGGER LOGO */}
-    <div className="mb-12 lg:mb-20">
-      <div className="relative w-80 h-80 sm:w-96 sm:h-96 md:w-[30rem] md:h-[30rem] lg:w-[40rem] lg:h-[40rem] xl:w-[48rem] xl:h-[48rem] mx-auto">
-        <Image
-          src="/logo.png"
-          alt="CASA CAFÉ"
-          fill
-          className="object-contain drop-shadow-2xl transition-transform duration-700 hover:scale-105 hover:rotate-1"
-          priority
-        />
-      </div>
-    </div>
+        {/* Floating coffee beans (example) */}
+        <svg className="absolute top-[20%] left-[25%] w-10 h-10 opacity-40 animate-bounce-slow" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5" fill="#a97452" />
+        </svg>
+        <svg className="absolute top-[35%] right-[20%] w-8 h-8 opacity-30 animate-bounce-slow" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4" fill="#a97452" />
+        </svg>
 
-    {/* BUTTON WITH PULSE/GLOW */}
-    <Link
-      href="/menu"
-      className="inline-block bg-[#DEBAA2] hover:bg-[#e8c9b8] text-[#2F0F24] px-10 py-4 sm:px-12 sm:py-5 md:px-14 md:py-6 
-        rounded-full text-lg sm:text-xl md:text-2xl font-semibold tracking-widest shadow-xl border-2 border-[#DEBAA2]/60
-        transition-all duration-500 hover:scale-105 animate-pulse"
-    >
-      Discover the Menu
-    </Link>
-
-    {/* Scroll Cue Arrow */}
-    <div className="mt-10 flex justify-center">
-      <svg
-        className="w-8 h-8 text-[#DEBAA2] animate-bounce"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
-  </div>
-</section>
-
-      {/* TODAY'S SPECIAL — GOLD BORDER */}
-      {specialItems.length > 0 && (
-        <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[#3a1a30] border-t-4 border-b-4 border-[#DEBAA2]/40">
-          <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-thin text-center text-[#DEBAA2] mb-16 lg:mb-24 drop-shadow-2xl tracking-widest uppercase">
-            Today's Masterpiece
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {specialItems.map(item => (
-              <MenuItem key={item.id} item={item} />
-            ))}
+        {/* Large Animated Logo */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
+          animate={{ opacity: 1, scale: 1, rotate: 0 }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
+          className="relative z-10 mb-12"
+        >
+          <div className="relative w-[85vw] h-[85vw] sm:w-[60vw] sm:h-[60vw] md:w-[36rem] md:h-[36rem] lg:w-[48rem] lg:h-[48rem] mx-auto">
+            <Image
+              src="/logo.png"
+              alt="CASA CAFÉ"
+              fill
+              priority
+              className="object-contain drop-shadow-lg"
+            />
           </div>
-        </section>
+        </motion.div>
+
+        {/* CTA Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.9 }}
+        >
+          <Link
+            href="/menu"
+            className="inline-flex items-center justify-center
+                       bg-[#d4af7f] hover:bg-[#c4996c]
+                       text-[#4a3221]
+                       px-16 py-6 rounded-full
+                       text-xl sm:text-2xl font-bold tracking-widest
+                       shadow-lg hover:shadow-2xl
+                       transition-all duration-500 hover:scale-110"
+          >
+            Explore Menu
+          </Link>
+        </motion.div>
+
+      </section>
+
+      {/* ================= TODAY'S SPECIAL ================= */}
+      {specialItems.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: '-100px' }}
+          transition={{ duration: 1.2 }}
+          className="py-28 px-6 bg-[#fff8f0]"
+        >
+          <div className="max-w-7xl mx-auto">
+            <h2 className="
+              text-4xl sm:text-5xl md:text-6xl
+              font-extralight text-center
+              mb-24
+              tracking-[0.35em] uppercase
+              text-[#4a3221]
+            ">
+              Today’s Special
+            </h2>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-12">
+              {specialItems.map(item => (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.9 }}
+                  className="bg-white rounded-3xl overflow-hidden
+                             shadow-[0_20px_60px_rgba(0,0,0,0.08)]
+                             hover:-translate-y-2 transition-all duration-500"
+                >
+                  <MenuItem item={item} />
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </motion.section>
       )}
 
-      {/* CATEGORIES PREVIEW */}
-      <section className="py-16 sm:py-24 lg:py-32 px-6 bg-[#2F0F24]/90 border-t-4 border-[#DEBAA2]/30">
-        <div className="max-w-7xl mx-auto space-y-20 sm:space-y-28 lg:space-y-36">
-          {categories?.map(category => {
+      {/* ================= CATEGORY PREVIEW ================= */}
+      <section className="py-32 px-6 bg-[#fdf8f6]">
+        <div className="max-w-7xl mx-auto space-y-44">
+          {categories.map(category => {
             const regularItems = category.items?.filter(i => !i.is_special) || []
-            if (regularItems.length === 0) return null
+            if (!regularItems.length) return null
 
             return (
-              <div
+              <motion.div
                 key={category.id}
-                className="border-b-2 border-[#DEBAA2]/20 pb-20 last:border-b-0 last:pb-0"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true, margin: '-120px' }}
+                transition={{ duration: 1.1 }}
               >
-                <h3 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-thin text-center text-[#DEBAA2] mb-16 lg:mb-20 tracking-widest uppercase drop-shadow-xl">
+                <h3 className="
+                  text-3xl sm:text-4xl md:text-5xl
+                  font-extralight text-center
+                  mb-20
+                  tracking-[0.4em] uppercase
+                  text-[#4a3221]
+                ">
                   {category.name}
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 lg:gap-12">
-                  {regularItems.slice(0, 6).map(item => (
-                    <MenuItem key={item.id} item={item} />
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-12">
+                  {regularItems.slice(0, 10).map(item => (
+                    <motion.div
+                      key={item.id}
+                      initial={{ opacity: 0, y: 40 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.8 }}
+                      className="bg-white rounded-3xl overflow-hidden
+                                 shadow-[0_20px_60px_rgba(0,0,0,0.08)]
+                                 hover:-translate-y-2 transition-all duration-500"
+                    >
+                      <MenuItem item={item} />
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )
           })}
         </div>
       </section>
 
-      {/* FLOATING CART */}
       <FloatingCart />
-    </main>
+    </>
   )
 }

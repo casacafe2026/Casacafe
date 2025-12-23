@@ -1,82 +1,201 @@
 'use client'
+
 import { useCart } from './cart-context'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { ShoppingCart } from 'lucide-react'
+import {
+  motion,
+  useScroll,
+  useTransform
+} from 'framer-motion'
 
 export default function MenuItem({ item }) {
   const { addToCart } = useCart()
   const [selectedVariant, setSelectedVariant] = useState(null)
+  const imageRef = useRef(null)
 
   if (!item.item_variants || item.item_variants.length === 0) return null
 
   useEffect(() => {
-    const defaultVariant = item.item_variants.find(v => v.is_default) || item.item_variants[0]
+    const defaultVariant =
+      item.item_variants.find(v => v.is_default) || item.item_variants[0]
     setSelectedVariant(defaultVariant)
   }, [item])
 
   const hasMultipleVariants = item.item_variants.length > 1
-  const currentPrice = selectedVariant ? (selectedVariant.price / 100).toFixed(0) : 0
+  const currentPrice = selectedVariant
+    ? (selectedVariant.price / 100).toFixed(0)
+    : 0
+
+  /* PARALLAX LOGIC */
+  const { scrollYProgress } = useScroll({
+    target: imageRef,
+    offset: ['start end', 'end start'],
+  })
+
+  const y = useTransform(scrollYProgress, [0, 1], [-18, 18])
 
   return (
-    <div className="w-full">
-      {/* Equal box with flex column */}
-      <div className="flex flex-col h-full rounded-2xl overflow-hidden border-2 border-[#DCBF98]/30 hover:border-[#DCBF98]/70 transition-all duration-500 shadow-md hover:shadow-xl">
-        {/* Image fixed ratio */}
-        <div className="aspect-square relative">
-          <Image
-            src={item.base_image_url || 'https://images.unsplash.com/photo-1512568400610-62da28bc8a13?w=800'}
-            alt={item.name}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110 brightness-90"
-            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-            unoptimized
-          />
+    <motion.div
+      className="h-full"
+      whileHover={{ y: -3 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+    >
+      {/* CARD */}
+      <div className="
+        h-full flex flex-col
+        bg-white
+        border border-black/10
+        rounded-lg
+        overflow-hidden
+      ">
+        {/* IMAGE — 70% */}
+        <div
+          ref={imageRef}
+          className="relative aspect-square flex-[7] overflow-hidden"
+        >
+          <motion.div
+            style={{ y }}
+            className="absolute inset-0"
+          >
+            <Image
+              src={
+                item.base_image_url ||
+                'https://images.unsplash.com/photo-1512568400610-62da28bc8a13?w=800'
+              }
+              alt={item.name}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          </motion.div>
+
           {item.is_special && (
-            <div className="absolute top-3 right-3 bg-[#DCBF98] text-[#2F0F24] px-3 py-1 rounded-full font-bold text-xs uppercase tracking-wider shadow-lg border border-[#2F0F24]/50">
-              Special
-            </div>
+            <span className="
+              absolute top-3 left-3
+              bg-[#e6c48f]
+              text-[#0f2e2a]
+              px-3 py-1
+              text-xs font-semibold uppercase tracking-wide
+            ">
+              Signature
+            </span>
           )}
         </div>
 
-        {/* Content area */}
-        <div className="flex flex-col flex-grow justify-between p-4 bg-[#2F0F24] text-center">
-          <div>
-            <h3 className="text-base lg:text-lg font-bold text-[#DCBF98] mb-2 line-clamp-2">
-              {item.name}
-            </h3>
+        {/* CONTENT — 30% */}
+        <div className="
+          flex-[3]
+          p-3
+          bg-white
+          rounded-b-xl
+          flex flex-col
+        ">
+          {/* ITEM NAME */}
+          <h3 className="
+            font-serif
+            text-[14px] sm:text-[15px]
+            text-[#0f2e2a]
+            leading-tight
+            mb-1
+            break-words
+          ">
+            {item.name}
+          </h3>
 
-            {hasMultipleVariants && (
-              <select
-                value={selectedVariant?.id || ''}
-                onChange={(e) => {
-                  const variant = item.item_variants.find(v => v.id === Number(e.target.value))
-                  setSelectedVariant(variant)
-                }}
-                className="mb-3 px-3 py-2 rounded-full bg-[#DCBF98]/15 text-[#DCBF98] text-xs lg:text-sm font-medium border border-[#DCBF98]/40 focus:outline-none focus:border-[#DCBF98] transition w-full"
-              >
-                {item.item_variants.map(v => (
-                  <option key={v.id} value={v.id} className="bg-[#2F0F24] text-[#DCBF98]">
-                    {v.size && `${v.size} `}{v.variant && v.variant} — ₹{(v.price / 100).toFixed(0)}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
+          {/* DESCRIPTION */}
+          {item.description && (
+            <p className="
+              text-[11px]
+              text-gray-600
+              leading-snug
+              mb-2
+              line-clamp-2
+            ">
+              {item.description}
+          </p>
+          )}
 
-          {/* Price + Button aligned consistently */}
-          <div>
-            <p className="text-xl lg:text-2xl font-extrabold text-[#DCBF98] mb-4">
+          {/* VARIANTS — UNDERLINE ANIMATION */}
+          {hasMultipleVariants && (
+            <div className="flex gap-3 mb-3 relative">
+              {item.item_variants.map(v => {
+                const isSelected = selectedVariant?.id === v.id
+
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => setSelectedVariant(v)}
+                    className={`
+                      relative pb-1
+                      text-[11px] sm:text-xs
+                      transition-colors
+                      ${
+                        isSelected
+                          ? 'text-[#0f2e2a] font-semibold'
+                          : 'text-gray-500 hover:text-[#0f2e2a]'
+                      }
+                    `}
+                  >
+                    {v.size && `${v.size} `}
+                    {v.variant}
+
+                    {isSelected && (
+                      <motion.span
+                        layoutId={`variant-underline-${item.id}`}
+                        className="
+                          absolute left-0 -bottom-0.5
+                          w-full h-[1.5px]
+                          bg-[#0f2e2a]
+                          rounded-full
+                        "
+                        transition={{
+                          type: 'spring',
+                          stiffness: 500,
+                          damping: 30,
+                        }}
+                      />
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
+          {/* FOOTER */}
+          <div className="mt-auto flex items-center justify-between gap-2">
+            <motion.p
+              key={currentPrice}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+              className="text-sm font-semibold text-[#0f2e2a]"
+            >
               ₹{currentPrice}
-            </p>
+            </motion.p>
+
             <button
               onClick={() => addToCart(item, selectedVariant)}
-              className="w-full bg-[#DCBF98] hover:bg-[#e8c9b8] text-[#2F0F24] py-3 px-6 rounded-full text-sm lg:text-base font-bold tracking-wide shadow-md hover:shadow-lg transition-all duration-300 border border-[#DCBF98]/50"
+              className="
+                border border-[#0f2e2a]
+                text-[#0f2e2a]
+                px-3 py-1.5
+                text-[11px] font-semibold
+                rounded-md
+                flex items-center gap-1.5
+                hover:bg-[#0f2e2a]
+                hover:text-[#e6c48f]
+                transition
+                whitespace-nowrap
+              "
             >
-              Add to Cart
+              <ShoppingCart size={13} />
+              Add
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

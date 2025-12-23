@@ -819,13 +819,24 @@ export default function AdminPanel() {
           </div>
         )}
 
-        {/* ITEM MODAL */}
+        {/* ITEM MODAL - NOW WITH OPTIONAL DESCRIPTION */}
         {showItemModal && (
           <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl p-8 sm:p-12 max-w-4xl w-full max-h-screen overflow-y-auto">
               <h2 className="text-3xl sm:text-4xl font-bold mb-8">{editingItem ? 'Edit Item' : 'Add New Item'}</h2>
 
               <input value={itemName} onChange={e => setItemName(e.target.value)} placeholder="Item Name" className="w-full px-6 py-4 border rounded-xl mb-6 text-lg sm:text-xl" />
+
+              {/* OPTIONAL DESCRIPTION FIELD */}
+              <div className="mb-8">
+                <label className="block text-xl sm:text-2xl font-bold mb-4">Description (Optional)</label>
+                <textarea
+                  value={desc}
+                  onChange={e => setDesc(e.target.value)}
+                  placeholder="e.g. Rich espresso with steamed milk and velvety foam"
+                  className="w-full px-6 py-4 border rounded-xl text-base sm:text-lg h-32 resize-none"
+                />
+              </div>
 
               <div className="mb-8">
                 <label className="block text-xl sm:text-2xl font-bold mb-4">Item Image</label>
