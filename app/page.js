@@ -47,63 +47,102 @@ export default function Home() {
   return (
     <>
       {/* ================= HERO SECTION ================= */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 bg-[#fdf8f1] overflow-hidden">
+      {/* ================= HERO SECTION ================= */}
+<section className="relative min-h-screen flex flex-col items-center justify-center bg-[#fdf8f1] overflow-hidden">
 
-        {/* Coffee-themed SVG decorations */}
-        <svg className="absolute top-[-5%] left-[5%] w-[15vw] h-[15vw] opacity-20 animate-spin-slow" viewBox="0 0 200 200">
-          <circle cx="100" cy="100" r="100" fill="#d4af7f" />
-        </svg>
-        <svg className="absolute bottom-[-5%] right-[10%] w-[12vw] h-[12vw] opacity-20 animate-pulse-slow" viewBox="0 0 200 200">
-          <ellipse cx="100" cy="100" rx="100" ry="50" fill="#c4996c" />
-        </svg>
+  {/* Background glow */}
+  <div className="absolute inset-0">
+    <div className="absolute top-1/2 left-1/2
+                    w-[180vw] h-[180vw]
+                    -translate-x-1/2 -translate-y-1/2
+                    bg-[radial-gradient(circle,rgba(212,175,127,0.22),transparent_65%)]" />
+  </div>
 
-        {/* Floating coffee beans (example) */}
-        <svg className="absolute top-[20%] left-[25%] w-10 h-10 opacity-40 animate-bounce-slow" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="5" fill="#a97452" />
-        </svg>
-        <svg className="absolute top-[35%] right-[20%] w-8 h-8 opacity-30 animate-bounce-slow" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="4" fill="#a97452" />
-        </svg>
+  {/* FLOATING LOGO */}
+  <motion.div
+    initial={{ opacity: 0, scale: 0.8 }}
+    animate={{
+      opacity: 1,
+      scale: 1,
+      y: [0, -12, 0],       // subtle floating
+    }}
+    transition={{
+      opacity: { duration: 1.2 },
+      scale: { duration: 1.2 },
+      y: {
+        duration: 6,
+        repeat: Infinity,
+        ease: 'easeInOut',
+      },
+    }}
+    className="relative z-10"
+  >
+    <div
+      className="
+        /* MOBILE FIRST */
+        w-[96vw] h-[96vw]
 
-        {/* Large Animated Logo */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
-          animate={{ opacity: 1, scale: 1, rotate: 0 }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
-          className="relative z-10 mb-12"
-        >
-          <div className="relative w-[85vw] h-[85vw] sm:w-[60vw] sm:h-[60vw] md:w-[36rem] md:h-[36rem] lg:w-[48rem] lg:h-[48rem] mx-auto">
-            <Image
-              src="/logo.png"
-              alt="CASA CAFÉ"
-              fill
-              priority
-              className="object-contain drop-shadow-lg"
-            />
-          </div>
-        </motion.div>
+        /* SMALL TABLETS */
+        sm:w-[82vw] sm:h-[82vw]
 
-        {/* CTA Button */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.9 }}
-        >
-          <Link
-            href="/menu"
-            className="inline-flex items-center justify-center
-                       bg-[#d4af7f] hover:bg-[#c4996c]
-                       text-[#4a3221]
-                       px-16 py-6 rounded-full
-                       text-xl sm:text-2xl font-bold tracking-widest
-                       shadow-lg hover:shadow-2xl
-                       transition-all duration-500 hover:scale-110"
-          >
-            Explore Menu
-          </Link>
-        </motion.div>
+        /* DESKTOP */
+        md:w-[52rem] md:h-[52rem]
 
-      </section>
+        /* LARGE SCREENS */
+        lg:w-[66rem] lg:h-[66rem]
+
+        /* TV / KIOSK MODE */
+        xl:w-[80rem] xl:h-[80rem]
+        2xl:w-[96rem] 2xl:h-[96rem]
+
+        mx-auto
+      "
+    >
+      <Image
+        src="/logo.png"
+        alt="CASA CAFÉ"
+        fill
+        priority
+        className="
+          object-contain
+          drop-shadow-[0_50px_120px_rgba(0,0,0,0.30)]
+        "
+      />
+    </div>
+  </motion.div>
+
+  {/* SMALL, UNOBTRUSIVE BUTTON */}
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.8, duration: 0.6 }}
+    className="relative z-10 mt-4 sm:mt-6"
+  >
+    <Link
+      href="/menu"
+      className="
+        inline-flex items-center justify-center
+        bg-[#d4af7f] hover:bg-[#c4996c]
+        text-[#4a3221]
+
+        /* MOBILE */
+        px-8 py-2 text-xs
+
+        /* DESKTOP */
+        sm:px-10 sm:py-3 sm:text-sm
+
+        rounded-full
+        tracking-widest
+        shadow-md hover:shadow-lg
+        transition-all duration-300
+      "
+    >
+      Explore Menu
+    </Link>
+  </motion.div>
+
+</section>
+
 
       {/* ================= TODAY'S SPECIAL ================= */}
       {specialItems.length > 0 && (

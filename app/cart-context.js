@@ -1,4 +1,4 @@
-// app/cart-context.js
+// app/cart-context.js - UPDATED FOR ADD-ONS
 'use client'
 import { createContext, useContext, useState, useEffect } from 'react'
 
@@ -6,26 +6,62 @@ const CartContext = createContext()
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([])
-  const [takeawayFee, setTakeawayFee] = useState(0)  // 0, 500 (₹5), or 1000 (₹10)
+  const [takeawayFee, setTakeawayFee] = useState(0)
 
-  // Update fee whenever cart changes AND takeaway is selected
+  // Add-on modal state
+  const [showAddonModal, setShowAddonModal] = useState(false)
+  const [currentProductForAddons, setCurrentProductForAddons] = useState(null)
+  const [selectedAddons, setSelectedAddons] = useState([])
+
+  // Recalculate takeaway fee
   useEffect(() => {
-    if (takeawayFee > 0) {  // Only recalculate if takeaway is active
+    if (takeawayFee > 0) {
       const itemsCount = cart.reduce((sum, i) => sum + i.quantity, 0)
       const newFee = itemsCount === 1 ? 500 : itemsCount > 1 ? 1000 : 0
       setTakeawayFee(newFee)
     }
   }, [cart])
 
-  const addToCart = (item, variant) => {
-    setCart(prev => {
-      const key = `${item.id}-${variant.id}`
-      const existing = prev.find(i => i.key === key)
-      if (existing) {
-        return prev.map(i => i.key === key ? { ...i, quantity: i.quantity + 1 } : i)
-      }
-      return [...prev, { key, item, variant, quantity: 1 }]
-    })
+  // Trigger add-on modal
+  const addToCartWithAddons = (product, variant) => {
+    setCurrentProductForAddons({ product, variant })
+    setSelectedAddons([])
+    setShowAddonModal(true)
+  }
+
+  // Confirm and add with selected add-ons
+  const confirmAddToCart = () => {
+    if (!currentProductForAddons) return
+
+    const { product, variant } = currentProductForAddons
+    const key = `${product.id}-${variant.id}-${Date.now()}`
+    const newItem = {
+      key,
+      item: product,
+      variant,
+      quantity: 1,
+      addons: selectedAddons
+    }
+
+    setCart(prev => [...prev, newItem])
+
+    setShowAddonModal(false)
+    setCurrentProductForAddons(null)
+    setSelectedAddons([])
+  }
+
+  // Direct add (fallback)
+  const addToCart = (product, variant, selectedAddons = []) => {
+    const key = `${product.id}-${variant.id}-${Date.now()}`
+    const newItem = {
+      key,
+      item: product,
+      variant,
+      quantity: 1,
+      addons: selectedAddons
+    }
+
+    setCart(prev => [...prev, newItem])
   }
 
   const removeFromCart = (key) => setCart(prev => prev.filter(i => i.key !== key))
@@ -38,21 +74,35 @@ export function CartProvider({ children }) {
   const clearCart = () => setCart([])
 
   const totalItems = cart.reduce((sum, i) => sum + i.quantity, 0)
-  const subtotal = cart.reduce((sum, i) => sum + (i.variant.price / 100) * i.quantity, 0)
-  const totalPrice = subtotal + (takeawayFee / 100)
+
+  const subtotalInRupees = cart.reduce((sum, cartItem) => {
+    const itemPrice = (cartItem.variant.price / 100) * cartItem.quantity
+    const addonsPrice = cartItem.addons.reduce((aSum, addon) => aSum + (addon.price / 100), 0) * cartItem.quantity
+    return sum + itemPrice + addonsPrice
+  }, 0)
+
+  const takeawayFeeInRupees = takeawayFee / 100
+  const totalPrice = subtotalInRupees + takeawayFeeInRupees
 
   return (
     <CartContext.Provider value={{
       cart,
       addToCart,
+      addToCartWithAddons,
+      confirmAddToCart,
       removeFromCart,
       updateQuantity,
       clearCart,
       totalItems,
       totalPrice,
-      subtotal,
+      subtotal: subtotalInRupees,
       takeawayFee,
-      setTakeawayFee
+      setTakeawayFee,
+      showAddonModal,
+      setShowAddonModal,
+      currentProductForAddons,
+      selectedAddons,
+      setSelectedAddons
     }}>
       {children}
     </CartContext.Provider>

@@ -1,4 +1,5 @@
 'use client'
+
 import { useCart } from './cart-context'
 import Link from 'next/link'
 import { ShoppingCart, Menu, X } from 'lucide-react'
@@ -11,31 +12,40 @@ export default function Header() {
   const pathname = usePathname()
 
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
-
   const sidebarPosition = pathname === '/' ? 'left-0' : 'right-0'
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center bg-[#5C2D1F]">
-        {/* Logo / Brand */}
+      <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center bg-[#4f193c]">
+
+        {/* BRAND NAME ONLY */}
         {pathname !== '/' && (
           <Link
-            href="/"
-            className="text-3xl sm:text-4xl font-serif tracking-wide text-[#FDF3E7]"
-          >
-            CASA CAFE
-          </Link>
+  href="/"
+  className="
+    text-3xl sm:text-4xl lg:text-5xl
+    font-[var(--font-greatvibes)]
+    tracking-[0.18em]
+    text-[#FDF3E7]
+    drop-shadow-[0_3px_10px_rgba(0,0,0,0.35)]
+    transition-colors duration-300
+    hover:text-amber-200
+  "
+>
+  CASA CAFÉ
+</Link>
+
         )}
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8 lg:gap-10 text-lg lg:text-xl font-medium">
-          <Link href="/menu" className="transition text-[#FDF3E7]">
+          <Link href="/menu" className="text-[#FDF3E7] hover:text-amber-200 transition">
             Menu
           </Link>
-          <Link href="/menu#special" className="transition text-[#FDF3E7]">
+          <Link href="/special" className="text-[#FDF3E7] hover:text-amber-200 transition">
             Today's Special
           </Link>
-          <Link href="/menu#combos" className="transition text-[#FDF3E7]">
+          <Link href="/combos" className="text-[#FDF3E7] hover:text-amber-200 transition">
             Combos
           </Link>
 
@@ -46,7 +56,7 @@ export default function Header() {
                 className="absolute -top-2 -right-2 rounded-full flex items-center justify-center font-bold text-sm lg:text-base shadow-lg animate-pulse"
                 style={{
                   backgroundColor: '#FDF3E7',
-                  color: '#5C2D1F',
+                  color: '#4f193c',
                   width: '1.75rem',
                   height: '1.75rem',
                 }}
@@ -74,10 +84,10 @@ export default function Header() {
           onClick={toggleMobileMenu}
         >
           <div
-            className={`fixed ${sidebarPosition} top-0 h-full w-72 shadow-2xl transform transition-transform duration-300 ease-in-out overflow-y-auto z-50`}
+            className={`fixed ${sidebarPosition} top-0 h-full w-72 shadow-2xl z-50`}
             style={{
               background:
-                'linear-gradient(to bottom right, rgba(92,45,31,0.95), rgba(92,45,31,0.8))',
+                'linear-gradient(to bottom right, rgba(79,25,60,0.95), rgba(79,25,60,0.85))',
               backdropFilter: 'blur(14px)',
               color: '#FDF3E7',
             }}
@@ -92,46 +102,34 @@ export default function Header() {
               </button>
 
               <nav className="flex flex-col gap-8 mt-6">
-                <Link
-                  href="/menu"
-                  onClick={toggleMobileMenu}
-                  className="text-2xl font-medium text-center transition"
-                >
+                <Link href="/menu" onClick={toggleMobileMenu} className="text-2xl text-center hover:text-amber-200">
                   Menu
                 </Link>
-                <Link
-                  href="/menu#special"
-                  onClick={toggleMobileMenu}
-                  className="text-2xl font-medium text-center transition"
-                >
+                <Link href="/special" onClick={toggleMobileMenu} className="text-2xl text-center hover:text-amber-200">
                   Today's Special
                 </Link>
-                <Link
-                  href="/menu#combos"
-                  onClick={toggleMobileMenu}
-                  className="text-2xl font-medium text-center transition"
-                >
+                <Link href="/combos" onClick={toggleMobileMenu} className="text-2xl text-center hover:text-amber-200">
                   Combos
                 </Link>
 
-                {/* Cart Button */}
+                {/* Cart */}
                 <Link
                   href="/cart"
                   onClick={toggleMobileMenu}
-                  className="flex flex-col items-center gap-3 py-4 rounded-xl transition"
-                  style={{ backgroundColor: '#FDF3E7', color: '#5C2D1F' }}
+                  className="flex flex-col items-center gap-3 py-4 rounded-xl mt-6"
+                  style={{ backgroundColor: '#FDF3E7', color: '#4f193c' }}
                 >
                   <div className="relative">
                     <ShoppingCart size={48} />
                     {totalItems > 0 && (
                       <span
-                        className="absolute -top-3 -right-3 rounded-full flex items-center justify-center font-bold text-lg shadow-lg animate-pulse border-2"
+                        className="absolute -top-3 -right-3 rounded-full flex items-center justify-center font-bold text-lg shadow-lg border-2 animate-pulse"
                         style={{
                           backgroundColor: '#FDF3E7',
-                          color: '#5C2D1F',
+                          color: '#4f193c',
                           width: '2.5rem',
                           height: '2.5rem',
-                          borderColor: '#5C2D1F',
+                          borderColor: '#4f193c',
                         }}
                       >
                         {totalItems}
