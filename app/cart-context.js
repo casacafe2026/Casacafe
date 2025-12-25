@@ -1,5 +1,6 @@
-// app/cart-context.js - UPDATED FOR ADD-ONS
+// app/cart-context.js - UPDATED WITH ADD TO CART TOAST NOTIFICATION
 'use client'
+
 import { createContext, useContext, useState, useEffect } from 'react'
 
 const CartContext = createContext()
@@ -12,6 +13,9 @@ export function CartProvider({ children }) {
   const [showAddonModal, setShowAddonModal] = useState(false)
   const [currentProductForAddons, setCurrentProductForAddons] = useState(null)
   const [selectedAddons, setSelectedAddons] = useState([])
+
+  // Toast notification state
+  const [toastItems, setToastItems] = useState([])
 
   // Recalculate takeaway fee
   useEffect(() => {
@@ -29,7 +33,7 @@ export function CartProvider({ children }) {
     setShowAddonModal(true)
   }
 
-  // Confirm and add with selected add-ons
+  // Confirm and add with selected add-ons + show toast
   const confirmAddToCart = () => {
     if (!currentProductForAddons) return
 
@@ -45,12 +49,19 @@ export function CartProvider({ children }) {
 
     setCart(prev => [...prev, newItem])
 
+    // Show toast
+    setToastItems(prev => [...prev, {
+      name: product.name,
+      variant: variant.size || variant.variant ? `${variant.size || ''} ${variant.variant || ''}`.trim() : 'Standard',
+      addonsCount: selectedAddons.length
+    }])
+
     setShowAddonModal(false)
     setCurrentProductForAddons(null)
     setSelectedAddons([])
   }
 
-  // Direct add (fallback)
+  // Direct add + show toast
   const addToCart = (product, variant, selectedAddons = []) => {
     const key = `${product.id}-${variant.id}-${Date.now()}`
     const newItem = {
@@ -62,7 +73,24 @@ export function CartProvider({ children }) {
     }
 
     setCart(prev => [...prev, newItem])
+
+    // Show toast
+    setToastItems(prev => [...prev, {
+      name: product.name,
+      variant: variant.size || variant.variant ? `${variant.size || ''} ${variant.variant || ''}`.trim() : 'Standard',
+      addonsCount: selectedAddons.length
+    }])
   }
+
+  // Auto-clear oldest toast after 3 seconds
+  useEffect(() => {
+    if (toastItems.length > 0) {
+      const timer = setTimeout(() => {
+        setToastItems(prev => prev.slice(1))
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [toastItems])
 
   const removeFromCart = (key) => setCart(prev => prev.filter(i => i.key !== key))
 
@@ -102,7 +130,8 @@ export function CartProvider({ children }) {
       setShowAddonModal,
       currentProductForAddons,
       selectedAddons,
-      setSelectedAddons
+      setSelectedAddons,
+      toastItems,  // ← Expose for toast component
     }}>
       {children}
     </CartContext.Provider>

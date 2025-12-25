@@ -11,7 +11,7 @@ import {
 } from 'framer-motion'
 
 export default function MenuItem({ item }) {
-  const { addToCart } = useCart()
+  const { addToCart } = useCart()  // ← Your original function — unchanged
   const [selectedVariant, setSelectedVariant] = useState(null)
   const imageRef = useRef(null)
 
@@ -28,6 +28,8 @@ export default function MenuItem({ item }) {
     ? (selectedVariant.price / 100).toFixed(0)
     : 0
 
+  const isOutOfStock = item.is_out_of_stock === true
+
   /* PARALLAX LOGIC */
   const { scrollYProgress } = useScroll({
     target: imageRef,
@@ -39,17 +41,26 @@ export default function MenuItem({ item }) {
   return (
     <motion.div
       className="h-full"
-      whileHover={{ y: -3 }}
+      whileHover={!isOutOfStock ? { y: -3 } : {}}
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       {/* CARD */}
       <div className="
-        h-full flex flex-col
+        relative h-full flex flex-col
         bg-white
         border border-black/10
         rounded-lg
         overflow-hidden
       ">
+        {/* OUT OF STOCK OVERLAY */}
+        {isOutOfStock && (
+          <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-20 rounded-lg pointer-events-none">
+            <span className="text-white text-3xl sm:text-4xl font-black tracking-wider rotate-[-15deg]">
+              OUT OF STOCK
+            </span>
+          </div>
+        )}
+
         {/* IMAGE — 70% */}
         <div
           ref={imageRef}
@@ -66,7 +77,7 @@ export default function MenuItem({ item }) {
               }
               alt={item.name}
               fill
-              className="object-cover"
+              className={`object-cover ${isOutOfStock ? 'brightness-50' : ''}`}
               unoptimized
             />
           </motion.div>
@@ -85,13 +96,14 @@ export default function MenuItem({ item }) {
         </div>
 
         {/* CONTENT — 30% */}
-        <div className="
+        <div className={`
           flex-[3]
           p-3
           bg-white
           rounded-b-xl
           flex flex-col
-        ">
+          ${isOutOfStock ? 'opacity-70' : ''}
+        `}>
           {/* ITEM NAME */}
           <h3 className="
             font-serif
@@ -114,11 +126,11 @@ export default function MenuItem({ item }) {
               line-clamp-2
             ">
               {item.description}
-          </p>
+            </p>
           )}
 
           {/* VARIANTS — UNDERLINE ANIMATION */}
-          {hasMultipleVariants && (
+          {hasMultipleVariants && !isOutOfStock && (
             <div className="flex gap-3 mb-3 relative">
               {item.item_variants.map(v => {
                 const isSelected = selectedVariant?.id === v.id
@@ -176,22 +188,19 @@ export default function MenuItem({ item }) {
             </motion.p>
 
             <button
-              onClick={() => addToCart(item, selectedVariant)}
-              className="
-                border border-[#0f2e2a]
-                text-[#0f2e2a]
-                px-3 py-1.5
-                text-[11px] font-semibold
-                rounded-md
-                flex items-center gap-1.5
-                hover:bg-[#0f2e2a]
-                hover:text-[#e6c48f]
-                transition
-                whitespace-nowrap
-              "
+              onClick={() => !isOutOfStock && addToCart(item, selectedVariant)}
+              disabled={isOutOfStock}
+              className={`
+                border px-3 py-1.5 text-[11px] font-semibold rounded-md
+                flex items-center gap-1.5 transition whitespace-nowrap
+                ${isOutOfStock
+                  ? 'border-gray-400 bg-gray-200 text-gray-500 cursor-not-allowed'
+                  : 'border-[#0f2e2a] text-[#0f2e2a] hover:bg-[#0f2e2a] hover:text-[#e6c48f]'
+                }
+              `}
             >
               <ShoppingCart size={13} />
-              Add
+              {isOutOfStock ? 'Unavailable' : 'Add'}
             </button>
           </div>
         </div>

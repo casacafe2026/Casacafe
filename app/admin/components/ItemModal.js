@@ -6,6 +6,7 @@ export default function ItemModal({
   showItemModal, setShowItemModal, editingItem, itemName, setItemName,
   imageFile, setImageFile, imagePreview, setImagePreview,
   isVeg, setIsVeg, isSpecial, setIsSpecial,
+  isOutOfStock, setIsOutOfStock,  // ← NEW: Out of Stock toggle
   variants, addVariant, removeVariant, updateVariant,
   saveItem, resetItemForm
 }) {
@@ -48,8 +49,10 @@ export default function ItemModal({
               )}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-12 items-center">
-              <div className="flex-1 text-center">
+            {/* Veg/Non-Veg, Today's Special, Out of Stock */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
+              {/* Veg / Non-Veg */}
+              <div className="text-center">
                 <p className="text-2xl font-bold mb-6">Veg / Non-Veg</p>
                 <div className="flex justify-center gap-12">
                   <label className="flex items-center gap-4 text-2xl cursor-pointer">
@@ -62,10 +65,32 @@ export default function ItemModal({
                   </label>
                 </div>
               </div>
-              <label className="flex items-center gap-6 text-2xl">
-                <input type="checkbox" checked={isSpecial} onChange={e => setIsSpecial(e.target.checked)} className="w-8 h-8" />
-                <span className="font-black text-amber-700">Today's Special</span>
-              </label>
+
+              {/* Today's Special */}
+              <div className="text-center">
+                <label className="flex flex-col items-center gap-4 text-2xl">
+                  <input 
+                    type="checkbox" 
+                    checked={isSpecial} 
+                    onChange={e => setIsSpecial(e.target.checked)} 
+                    className="w-10 h-10"
+                  />
+                  <span className="font-black text-amber-700">Today's Special</span>
+                </label>
+              </div>
+
+              {/* Out of Stock */}
+              <div className="text-center">
+                <label className="flex flex-col items-center gap-4 text-2xl">
+                  <input 
+                    type="checkbox" 
+                    checked={isOutOfStock} 
+                    onChange={e => setIsOutOfStock(e.target.checked)} 
+                    className="w-10 h-10 accent-red-600"
+                  />
+                  <span className="font-black text-red-600">Out of Stock</span>
+                </label>
+              </div>
             </div>
 
             <div>

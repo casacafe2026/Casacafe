@@ -1,8 +1,6 @@
 // app/admin/hooks/useAdminData.js - FULL, COMPLETE & FINAL VERSION
-// Includes: Addons with global/category/item mapping + Add-on Category toggle for upselling
-
 import { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabase'  // Reliable relative path
+import { supabase } from '../../lib/supabase'
 import { useRouter } from 'next/navigation'
 
 export default function useAdminData() {
@@ -31,6 +29,7 @@ export default function useAdminData() {
   const [desc, setDesc] = useState('')
   const [isVeg, setIsVeg] = useState(true)
   const [isSpecial, setIsSpecial] = useState(false)
+  const [isOutOfStock, setIsOutOfStock] = useState(false)  // ← NEW: Out of Stock state
   const [variants, setVariants] = useState([{ size: '', variant: '', price: '' }])
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
@@ -53,17 +52,7 @@ export default function useAdminData() {
   const [comboImagePreview, setComboImagePreview] = useState('')
   const [selectedComboItems, setSelectedComboItems] = useState([])
 
-    const toggleTopSelling = async (itemId, current) => {
-    await supabase.from('items').update({ is_top_selling: !current }).eq('id', itemId)
-    fetchCategories()
-  }
-
-  const toggleRecommended = async (itemId, current) => {
-    await supabase.from('items').update({ is_recommended: !current }).eq('id', itemId)
-    fetchCategories()
-  }
-
-  // Addon Modal - Full Mapping Support
+  // Addon Modal
   const [showAddonModal, setShowAddonModal] = useState(false)
   const [editingAddon, setEditingAddon] = useState(null)
   const [addonName, setAddonName] = useState('')
@@ -105,7 +94,6 @@ export default function useAdminData() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, (payload) => {
         setOrders(prev => [payload.new, ...prev])
 
-        // Custom sound + vibration
         const playNotification = () => {
           const audio = new Audio('/sounds/new-order.mp3')
           audio.volume = 1.0
@@ -195,6 +183,16 @@ export default function useAdminData() {
     fetchCategories()
   }
 
+  const toggleTopSelling = async (itemId, current) => {
+    await supabase.from('items').update({ is_top_selling: !current }).eq('id', itemId)
+    fetchCategories()
+  }
+
+  const toggleRecommended = async (itemId, current) => {
+    await supabase.from('items').update({ is_recommended: !current }).eq('id', itemId)
+    fetchCategories()
+  }
+
   // === ITEM ACTIONS ===
   const resetItemForm = () => {
     setEditingItem(null)
@@ -202,6 +200,7 @@ export default function useAdminData() {
     setDesc('')
     setIsVeg(true)
     setIsSpecial(false)
+    setIsOutOfStock(false)  // ← Reset Out of Stock
     setVariants([{ size: '', variant: '', price: '' }])
     setImageFile(null)
     setImagePreview('')
@@ -214,6 +213,7 @@ export default function useAdminData() {
     setDesc(item.description || '')
     setIsVeg(item.is_veg)
     setIsSpecial(item.is_special || false)
+    setIsOutOfStock(item.is_out_of_stock || false)  // ← Load current value
     setImagePreview(item.base_image_url || '')
     setImageFile(null)
 
@@ -247,7 +247,8 @@ export default function useAdminData() {
       description: desc || null,
       is_veg: isVeg,
       base_image_url: imageUrl || null,
-      is_special: isSpecial
+      is_special: isSpecial,
+      is_out_of_stock: isOutOfStock  // ← SAVE THE FLAG
     }
 
     let itemId
@@ -425,7 +426,7 @@ export default function useAdminData() {
     fetchCombos()
   }
 
-  // === ADDONS WITH FULL MAPPING ===
+  // === ADDONS ===
   const openAddonModal = (addon = null) => {
     if (addon) {
       setEditingAddon(addon)
@@ -502,7 +503,7 @@ export default function useAdminData() {
 
   // === RETURN ALL ===
   return {
-        toggleTopSelling,
+    toggleTopSelling,
     toggleRecommended,
     activeTab, setActiveTab,
     user,
@@ -515,6 +516,7 @@ export default function useAdminData() {
     showItemModal, setShowItemModal, editingItem, setEditingItem,
     selectedCat, setSelectedCat, itemName, setItemName, desc, setDesc,
     isVeg, setIsVeg, isSpecial, setIsSpecial,
+    isOutOfStock, setIsOutOfStock,  // ← RETURNED
     variants, setVariants, imageFile, setImageFile, imagePreview, setImagePreview,
 
     // Special Modal

@@ -2,8 +2,9 @@
 
 import { useCart } from './cart-context'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ShoppingCart, Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 
 export default function Header() {
@@ -14,27 +15,37 @@ export default function Header() {
   const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen)
   const sidebarPosition = pathname === '/' ? 'left-0' : 'right-0'
 
+  // Close menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false)
+  }, [pathname])
+
+  // Prevent body scroll when menu open
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : 'auto'
+  }, [isMobileMenuOpen])
+
   return (
     <header className="sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center bg-[#4f193c]">
 
-        {/* BRAND NAME ONLY */}
+        {/* BRAND LOGO */}
         {pathname !== '/' && (
           <Link
-  href="/"
-  className="
-    text-3xl sm:text-4xl lg:text-5xl
-    font-[var(--font-greatvibes)]
-    tracking-[0.18em]
-    text-[#FDF3E7]
-    drop-shadow-[0_3px_10px_rgba(0,0,0,0.35)]
-    transition-colors duration-300
-    hover:text-amber-200
-  "
->
-  CASA CAFÉ
-</Link>
-
+            href="/"
+            className="flex items-center gap-2 hover:opacity-90 transition"
+            aria-label="Casa Cafe Home"
+          >
+            <div className="relative w-32 sm:w-36 lg:w-44 h-10 sm:h-12 lg:h-14">
+              <Image
+                src="/brand-logo.png"   // <-- your brand logo
+                alt="Casa Cafe"
+                fill
+                priority
+                className="object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
+              />
+            </div>
+          </Link>
         )}
 
         {/* Desktop Nav */}
@@ -72,6 +83,7 @@ export default function Header() {
           onClick={toggleMobileMenu}
           className="md:hidden text-[#FDF3E7]"
           aria-label="Toggle menu"
+          aria-expanded={isMobileMenuOpen}
         >
           {isMobileMenuOpen ? <X size={32} /> : <Menu size={32} />}
         </button>
@@ -84,6 +96,8 @@ export default function Header() {
           onClick={toggleMobileMenu}
         >
           <div
+            role="dialog"
+            aria-modal="true"
             className={`fixed ${sidebarPosition} top-0 h-full w-72 shadow-2xl z-50`}
             style={{
               background:
@@ -112,7 +126,6 @@ export default function Header() {
                   Combos
                 </Link>
 
-                {/* Cart */}
                 <Link
                   href="/cart"
                   onClick={toggleMobileMenu}

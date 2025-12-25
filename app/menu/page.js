@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import FloatingCart from '../FloatingCart'
@@ -24,6 +25,7 @@ export default function MenuPage() {
             description,
             base_image_url,
             is_special,
+            is_out_of_stock,
             item_variants (
               id,
               size,
