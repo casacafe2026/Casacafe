@@ -1,14 +1,11 @@
-// app/checkout/page.js
 'use client'
 import { useCart } from '../cart-context'
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 export default function Checkout() {
   const { cart, totalPrice, takeawayFee, clearCart } = useCart()
-  const router = useRouter()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [table, setTable] = useState('')
@@ -78,63 +75,63 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-100 to-amber-50 py-12 lg:py-20 px-6">
+    <div className="min-h-screen bg-gradient-to-b from-stone-100 to-amber-50 py-12 lg:py-20 px-4 sm:px-6 lg:px-16">
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-5xl lg:text-7xl font-thin text-center text-black mb-12 tracking-widest uppercase">
+        <h1 className="text-5xl lg:text-7xl font-extrabold text-center text-black mb-12 tracking-wide uppercase">
           Checkout
         </h1>
 
         <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
           <form onSubmit={handleSubmit} className="space-y-8">
-            <div>
-              <label className="block text-xl lg:text-2xl font-medium text-black mb-3">Your Name</label>
+            {/* NAME */}
+            <div className="relative">
+              <label className="block text-xl lg:text-2xl font-medium text-black mb-2">Your Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Enter your name"
                 required
-                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition text-black"
+                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition shadow-sm focus:shadow-md"
               />
             </div>
 
-            <div>
-              <label className="block text-xl lg:text-2xl font-medium text-black mb-3">Phone Number</label>
+            {/* PHONE */}
+            <div className="relative">
+              <label className="block text-xl lg:text-2xl font-medium text-black mb-2">Phone Number</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="Enter your phone number"
                 required
-                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition text-black"
+                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition shadow-sm focus:shadow-md"
               />
             </div>
 
-            {/* Table Number — Only for Dine-In */}
+            {/* TABLE NUMBER */}
             {!isTakeaway && (
-              <div>
-                <label className="block text-xl lg:text-2xl font-medium text-black mb-3">Table Number</label>
+              <div className="relative">
+                <label className="block text-xl lg:text-2xl font-medium text-black mb-2">Table Number</label>
                 <select
                   value={table}
                   onChange={e => setTable(e.target.value)}
-                  className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition bg-white text-black"
                   required={!isTakeaway}
+                  className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition shadow-sm focus:shadow-md bg-white"
                 >
                   <option value="" disabled>
-                    Please select your table
+                    Select your table
                   </option>
-                  <option value="1">Table 1</option>
-                  <option value="2">Table 2</option>
-                  <option value="3">Table 3</option>
-                  <option value="4">Table 4</option>
-                  <option value="5">Table 5</option>
+                  {[1,2,3,4,5,6,7].map(t => (
+                    <option key={t} value={t}>Table {t}</option>
+                  ))}
                 </select>
               </div>
             )}
 
-            {/* Order Summary */}
-            <div className="bg-amber-50 rounded-2xl p-6 lg:p-8">
-              <p className="text-xl lg:text-2xl font-medium text-black mb-4">
+            {/* ORDER SUMMARY */}
+            <div className="bg-amber-50 rounded-2xl p-6 lg:p-8 shadow-inner">
+              <p className="text-xl lg:text-2xl font-medium text-black mb-2">
                 Order Type: <span className="font-bold text-black">{isTakeaway ? 'Takeaway' : 'Dine-In'}</span>
               </p>
               <p className="text-3xl lg:text-4xl font-bold text-black">
@@ -142,6 +139,7 @@ export default function Checkout() {
               </p>
             </div>
 
+            {/* PLACE ORDER BUTTON */}
             <button
               type="submit"
               disabled={loading}
