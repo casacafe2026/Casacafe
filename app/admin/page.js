@@ -15,6 +15,7 @@ import ComboModal from './components/ComboModal'
 import AddonModal from './components/AddonModal'
 import PayModals from './components/PayModals'
 import useAdminData from './hooks/useAdminData'
+import SoundManager from './components/SoundManager'
 
 export default function AdminPanel() {
   const adminData = useAdminData()
@@ -46,6 +47,7 @@ export default function AdminPanel() {
         <ComboModal {...adminData} />
         <AddonModal {...adminData} />
         <PayModals {...adminData} />
+        <SoundManager />
       </div>
     </div>
   )

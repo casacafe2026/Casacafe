@@ -97,7 +97,7 @@ export default function useAdminData() {
         setOrders(prev => [payload.new, ...prev])
 
         const playNotification = () => {
-          const audio = new Audio('/sounds/new-order.mp3')
+          const audio = new Audio('https://quzyhbqmmjeyphbrnecz.supabase.co/storage/v1/object/public/sounds/new-order.mp3')
           audio.volume = 1.0
           audio.play().catch(() => {})
 
