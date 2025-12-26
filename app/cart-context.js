@@ -1,4 +1,4 @@
-// app/cart-context.js - UPDATED WITH ADD TO CART TOAST NOTIFICATION
+// app/cart-context.js - MERGES SAME ITEM + SAME VARIANT, 2-SECOND TOAST
 'use client'
 
 import { createContext, useContext, useState, useEffect } from 'react'
@@ -33,46 +33,42 @@ export function CartProvider({ children }) {
     setShowAddonModal(true)
   }
 
-  // Confirm and add with selected add-ons + show toast
+  // Confirm add with add-ons + merge logic
   const confirmAddToCart = () => {
     if (!currentProductForAddons) return
 
     const { product, variant } = currentProductForAddons
-    const key = `${product.id}-${variant.id}-${Date.now()}`
-    const newItem = {
-      key,
-      item: product,
-      variant,
-      quantity: 1,
-      addons: selectedAddons
-    }
 
-    setCart(prev => [...prev, newItem])
-
-    // Show toast
-    setToastItems(prev => [...prev, {
-      name: product.name,
-      variant: variant.size || variant.variant ? `${variant.size || ''} ${variant.variant || ''}`.trim() : 'Standard',
-      addonsCount: selectedAddons.length
-    }])
+    addToCart(product, variant, selectedAddons)
 
     setShowAddonModal(false)
     setCurrentProductForAddons(null)
     setSelectedAddons([])
   }
 
-  // Direct add + show toast
+  // Main addToCart — merges same item + same variant
   const addToCart = (product, variant, selectedAddons = []) => {
-    const key = `${product.id}-${variant.id}-${Date.now()}`
-    const newItem = {
-      key,
-      item: product,
-      variant,
-      quantity: 1,
-      addons: selectedAddons
-    }
+    const matchKey = `${product.id}-${variant.id}`
 
-    setCart(prev => [...prev, newItem])
+    setCart(prev => {
+      const existingIndex = prev.findIndex(i => i.key === matchKey)
+
+      if (existingIndex !== -1) {
+        // Same item + same variant → increase quantity
+        const updated = [...prev]
+        updated[existingIndex].quantity += 1
+        return updated
+      } else {
+        // New combination → add as new entry
+        return [...prev, {
+          key: matchKey,
+          item: product,
+          variant,
+          quantity: 1,
+          addons: selectedAddons
+        }]
+      }
+    })
 
     // Show toast
     setToastItems(prev => [...prev, {
@@ -82,12 +78,13 @@ export function CartProvider({ children }) {
     }])
   }
 
-  // Auto-clear oldest toast after 3 seconds
+  // Auto-clear toast after 2 seconds
   useEffect(() => {
     if (toastItems.length > 0) {
       const timer = setTimeout(() => {
         setToastItems(prev => prev.slice(1))
-      }, 3000)
+      }, 2000)
+
       return () => clearTimeout(timer)
     }
   }, [toastItems])
@@ -95,8 +92,11 @@ export function CartProvider({ children }) {
   const removeFromCart = (key) => setCart(prev => prev.filter(i => i.key !== key))
 
   const updateQuantity = (key, qty) => {
-    if (qty <= 0) removeFromCart(key)
-    else setCart(prev => prev.map(i => i.key === key ? { ...i, quantity: qty } : i))
+    if (qty <= 0) {
+      removeFromCart(key)
+    } else {
+      setCart(prev => prev.map(i => i.key === key ? { ...i, quantity: qty } : i))
+    }
   }
 
   const clearCart = () => setCart([])
@@ -131,7 +131,7 @@ export function CartProvider({ children }) {
       currentProductForAddons,
       selectedAddons,
       setSelectedAddons,
-      toastItems,  // ← Expose for toast component
+      toastItems,
     }}>
       {children}
     </CartContext.Provider>
