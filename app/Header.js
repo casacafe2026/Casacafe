@@ -36,7 +36,8 @@ export default function Header() {
             className="flex items-center gap-2 hover:opacity-90 transition"
             aria-label="Casa Cafe Home"
           >
-            <div className="relative w-32 sm:w-36 lg:w-44 h-10 sm:h-12 lg:h-14">
+            <div className="relative w-48 sm:w-58 lg:w-56 h-10 sm:h-12 lg:h-14">
+   
               <Image
                 src="/brand-logo.png"   // <-- your brand logo
                 alt="Casa Cafe"

@@ -6,11 +6,36 @@ export default function ItemModal({
   showItemModal, setShowItemModal, editingItem, itemName, setItemName,
   imageFile, setImageFile, imagePreview, setImagePreview,
   isVeg, setIsVeg, isSpecial, setIsSpecial,
-  isOutOfStock, setIsOutOfStock,  // ← NEW: Out of Stock toggle
+  isOutOfStock, setIsOutOfStock,
+  isTopSelling, setIsTopSelling,
+  isRecommended, setIsRecommended,
+  toggleTopSelling,
+  toggleRecommended,
   variants, addVariant, removeVariant, updateVariant,
   saveItem, resetItemForm
 }) {
   if (!showItemModal) return null
+
+  // Optimistic toggle handlers — update UI immediately
+  const handleToggleTopSelling = async () => {
+    if (!editingItem) return
+
+    // Optimistically update local state
+    setIsTopSelling(prev => !prev)
+
+    // Update database in background
+    await toggleTopSelling(editingItem.id, isTopSelling)
+  }
+
+  const handleToggleRecommended = async () => {
+    if (!editingItem) return
+
+    // Optimistically update local state
+    setIsRecommended(prev => !prev)
+
+    // Update database in background
+    await toggleRecommended(editingItem.id, isRecommended)
+  }
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
@@ -49,18 +74,18 @@ export default function ItemModal({
               )}
             </div>
 
-            {/* Veg/Non-Veg, Today's Special, Out of Stock */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-center">
+            {/* All Toggles Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center">
               {/* Veg / Non-Veg */}
-              <div className="text-center">
-                <p className="text-2xl font-bold mb-6">Veg / Non-Veg</p>
-                <div className="flex justify-center gap-12">
-                  <label className="flex items-center gap-4 text-2xl cursor-pointer">
-                    <input type="radio" checked={isVeg} onChange={() => setIsVeg(true)} className="w-8 h-8" />
+              <div className="text-center col-span-2 md:col-span-1">
+                <p className="text-xl font-bold mb-4">Veg / Non-Veg</p>
+                <div className="flex justify-center gap-8">
+                  <label className="flex items-center gap-3 text-xl cursor-pointer">
+                    <input type="radio" checked={isVeg} onChange={() => setIsVeg(true)} className="w-7 h-7" />
                     <span className="text-green-700 font-black">VEG</span>
                   </label>
-                  <label className="flex items-center gap-4 text-2xl cursor-pointer">
-                    <input type="radio" checked={!isVeg} onChange={() => setIsVeg(false)} className="w-8 h-8" />
+                  <label className="flex items-center gap-3 text-xl cursor-pointer">
+                    <input type="radio" checked={!isVeg} onChange={() => setIsVeg(false)} className="w-7 h-7" />
                     <span className="text-red-700 font-black">NON-VEG</span>
                   </label>
                 </div>
@@ -68,12 +93,12 @@ export default function ItemModal({
 
               {/* Today's Special */}
               <div className="text-center">
-                <label className="flex flex-col items-center gap-4 text-2xl">
+                <label className="flex flex-col items-center gap-3 text-xl">
                   <input 
                     type="checkbox" 
                     checked={isSpecial} 
                     onChange={e => setIsSpecial(e.target.checked)} 
-                    className="w-10 h-10"
+                    className="w-9 h-9"
                   />
                   <span className="font-black text-amber-700">Today's Special</span>
                 </label>
@@ -81,14 +106,42 @@ export default function ItemModal({
 
               {/* Out of Stock */}
               <div className="text-center">
-                <label className="flex flex-col items-center gap-4 text-2xl">
+                <label className="flex flex-col items-center gap-3 text-xl">
                   <input 
                     type="checkbox" 
                     checked={isOutOfStock} 
                     onChange={e => setIsOutOfStock(e.target.checked)} 
-                    className="w-10 h-10 accent-red-600"
+                    className="w-9 h-9 accent-red-600"
                   />
                   <span className="font-black text-red-600">Out of Stock</span>
+                </label>
+              </div>
+
+              {/* Top Selling */}
+              <div className="text-center">
+                <label className="flex flex-col items-center gap-3 text-xl">
+                  <input 
+                    type="checkbox" 
+                    checked={isTopSelling} 
+                    onChange={handleToggleTopSelling}
+                    disabled={!editingItem}
+                    className="w-9 h-9 accent-orange-600"
+                  />
+                  <span className="font-black text-orange-700">Top Selling</span>
+                </label>
+              </div>
+
+              {/* Recommended */}
+              <div className="text-center">
+                <label className="flex flex-col items-center gap-3 text-xl">
+                  <input 
+                    type="checkbox" 
+                    checked={isRecommended} 
+                    onChange={handleToggleRecommended}
+                    disabled={!editingItem}
+                    className="w-9 h-9 accent-purple-600"
+                  />
+                  <span className="font-black text-purple-700">Recommended</span>
                 </label>
               </div>
             </div>

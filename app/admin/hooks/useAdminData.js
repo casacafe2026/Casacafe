@@ -29,7 +29,9 @@ export default function useAdminData() {
   const [desc, setDesc] = useState('')
   const [isVeg, setIsVeg] = useState(true)
   const [isSpecial, setIsSpecial] = useState(false)
-  const [isOutOfStock, setIsOutOfStock] = useState(false)  // ← NEW: Out of Stock state
+  const [isOutOfStock, setIsOutOfStock] = useState(false)
+  const [isTopSelling, setIsTopSelling] = useState(false)        // ← Top Selling state
+  const [isRecommended, setIsRecommended] = useState(false)      // ← Recommended state
   const [variants, setVariants] = useState([{ size: '', variant: '', price: '' }])
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState('')
@@ -200,7 +202,9 @@ export default function useAdminData() {
     setDesc('')
     setIsVeg(true)
     setIsSpecial(false)
-    setIsOutOfStock(false)  // ← Reset Out of Stock
+    setIsOutOfStock(false)
+    setIsTopSelling(false)        // ← Reset
+    setIsRecommended(false)       // ← Reset
     setVariants([{ size: '', variant: '', price: '' }])
     setImageFile(null)
     setImagePreview('')
@@ -213,7 +217,9 @@ export default function useAdminData() {
     setDesc(item.description || '')
     setIsVeg(item.is_veg)
     setIsSpecial(item.is_special || false)
-    setIsOutOfStock(item.is_out_of_stock || false)  // ← Load current value
+    setIsOutOfStock(item.is_out_of_stock || false)
+    setIsTopSelling(item.is_top_selling || false)      // ← Load value
+    setIsRecommended(item.is_recommended || false)     // ← Load value
     setImagePreview(item.base_image_url || '')
     setImageFile(null)
 
@@ -248,7 +254,8 @@ export default function useAdminData() {
       is_veg: isVeg,
       base_image_url: imageUrl || null,
       is_special: isSpecial,
-      is_out_of_stock: isOutOfStock  // ← SAVE THE FLAG
+      is_out_of_stock: isOutOfStock
+      // is_top_selling and is_recommended updated separately via toggles
     }
 
     let itemId
@@ -516,7 +523,10 @@ export default function useAdminData() {
     showItemModal, setShowItemModal, editingItem, setEditingItem,
     selectedCat, setSelectedCat, itemName, setItemName, desc, setDesc,
     isVeg, setIsVeg, isSpecial, setIsSpecial,
-    isOutOfStock, setIsOutOfStock,  // ← RETURNED
+    isOutOfStock, setIsOutOfStock,
+    isTopSelling, setIsTopSelling,
+    isRecommended, setIsRecommended,
+    openEditItem,
     variants, setVariants, imageFile, setImageFile, imagePreview, setImagePreview,
 
     // Special Modal
