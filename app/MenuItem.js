@@ -11,7 +11,7 @@ import {
 } from 'framer-motion'
 
 export default function MenuItem({ item }) {
-  const { addToCart } = useCart()  // ← Your original function — unchanged
+  const { addToCart } = useCart()
   const [selectedVariant, setSelectedVariant] = useState(null)
   const imageRef = useRef(null)
 
@@ -45,23 +45,15 @@ export default function MenuItem({ item }) {
       transition={{ duration: 0.3, ease: 'easeOut' }}
     >
       {/* CARD */}
-      <div className="
+      <div className={`
         relative h-full flex flex-col
         bg-white
         border border-black/10
-        rounded-lg
+        rounded-xl
+        shadow-lg
         overflow-hidden
-      ">
-        {/* OUT OF STOCK OVERLAY */}
-        {isOutOfStock && (
-          <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-20 rounded-lg pointer-events-none">
-            <span className="text-white text-3xl sm:text-4xl font-black tracking-wider rotate-[-15deg]">
-              OUT OF STOCK
-            </span>
-          </div>
-        )}
-
-        {/* IMAGE — 70% */}
+      `}>
+        {/* IMAGE */}
         <div
           ref={imageRef}
           className="relative aspect-square flex-[7] overflow-hidden"
@@ -77,7 +69,7 @@ export default function MenuItem({ item }) {
               }
               alt={item.name}
               fill
-              className={`object-cover ${isOutOfStock ? 'brightness-50' : ''}`}
+              className={`object-cover rounded-t-xl ${isOutOfStock ? 'brightness-75' : ''}`}
               unoptimized
             />
           </motion.div>
@@ -85,24 +77,40 @@ export default function MenuItem({ item }) {
           {item.is_special && (
             <span className="
               absolute top-3 left-3
-              bg-[#e6c48f]
+              bg-yellow-200
               text-[#0f2e2a]
               px-3 py-1
               text-xs font-semibold uppercase tracking-wide
+              rounded-md
+              shadow-sm
             ">
               Signature
             </span>
           )}
+
+          {/* OUT OF STOCK LABEL */}
+          {isOutOfStock && (
+            <div className="
+              absolute top-2 right-2
+              bg-red-600 bg-opacity-90
+              text-white text-xs sm:text-sm
+              font-bold px-2 py-1
+              rounded-md
+              shadow-md
+              z-10
+            ">
+              OUT OF STOCK
+            </div>
+          )}
         </div>
 
-        {/* CONTENT — 30% */}
+        {/* CONTENT */}
         <div className={`
           flex-[3]
-          p-3
+          p-4
           bg-white
-          rounded-b-xl
           flex flex-col
-          ${isOutOfStock ? 'opacity-70' : ''}
+          ${isOutOfStock ? 'opacity-80' : ''}
         `}>
           {/* ITEM NAME */}
           <h3 className="
@@ -110,7 +118,7 @@ export default function MenuItem({ item }) {
             text-[14px] sm:text-[15px]
             text-[#0f2e2a]
             leading-tight
-            mb-1
+            mb-2
             break-words
           ">
             {item.name}
@@ -120,33 +128,30 @@ export default function MenuItem({ item }) {
           {item.description && (
             <p className="
               text-[11px]
-              text-gray-600
+              text-gray-500
               leading-snug
-              mb-2
+              mb-3
               line-clamp-2
             ">
               {item.description}
             </p>
           )}
 
-          {/* VARIANTS — UNDERLINE ANIMATION */}
+          {/* VARIANTS */}
           {hasMultipleVariants && !isOutOfStock && (
-            <div className="flex gap-3 mb-3 relative">
+            <div className="flex flex-wrap gap-2 mb-4">
               {item.item_variants.map(v => {
                 const isSelected = selectedVariant?.id === v.id
-
                 return (
                   <button
                     key={v.id}
                     onClick={() => setSelectedVariant(v)}
                     className={`
-                      relative pb-1
-                      text-[11px] sm:text-xs
-                      transition-colors
-                      ${
-                        isSelected
-                          ? 'text-[#0f2e2a] font-semibold'
-                          : 'text-gray-500 hover:text-[#0f2e2a]'
+                      relative px-3 py-1 text-[11px] sm:text-xs
+                      transition-all duration-200
+                      ${isSelected
+                        ? 'bg-[#0f2e2a] text-white font-semibold -translate-y-1 shadow-md rounded-md'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 rounded-md'
                       }
                     `}
                   >
@@ -158,8 +163,8 @@ export default function MenuItem({ item }) {
                         layoutId={`variant-underline-${item.id}`}
                         className="
                           absolute left-0 -bottom-0.5
-                          w-full h-[1.5px]
-                          bg-[#0f2e2a]
+                          w-full h-[2px]
+                          bg-white
                           rounded-full
                         "
                         transition={{
@@ -194,8 +199,8 @@ export default function MenuItem({ item }) {
                 border px-3 py-1.5 text-[11px] font-semibold rounded-md
                 flex items-center gap-1.5 transition whitespace-nowrap
                 ${isOutOfStock
-                  ? 'border-gray-400 bg-gray-200 text-gray-500 cursor-not-allowed'
-                  : 'border-[#0f2e2a] text-[#0f2e2a] hover:bg-[#0f2e2a] hover:text-[#e6c48f]'
+                  ? 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'border-[#0f2e2a] text-[#0f2e2a] hover:bg-[#0f2e2a] hover:text-[#f3d999]'
                 }
               `}
             >
