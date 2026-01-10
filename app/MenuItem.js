@@ -88,7 +88,6 @@ export default function MenuItem({ item }) {
             </span>
           )}
 
-          {/* OUT OF STOCK LABEL */}
           {isOutOfStock && (
             <div className="
               absolute top-2 right-2
@@ -112,7 +111,6 @@ export default function MenuItem({ item }) {
           flex flex-col
           ${isOutOfStock ? 'opacity-80' : ''}
         `}>
-          {/* ITEM NAME */}
           <h3 className="
             font-serif
             text-[14px] sm:text-[15px]
@@ -124,7 +122,6 @@ export default function MenuItem({ item }) {
             {item.name}
           </h3>
 
-          {/* DESCRIPTION */}
           {item.description && (
             <p className="
               text-[11px]
@@ -137,7 +134,7 @@ export default function MenuItem({ item }) {
             </p>
           )}
 
-          {/* VARIANTS */}
+          {/* VARIANTS - OPTION 2 */}
           {hasMultipleVariants && !isOutOfStock && (
             <div className="flex flex-wrap gap-2 mb-4">
               {item.item_variants.map(v => {
@@ -147,11 +144,11 @@ export default function MenuItem({ item }) {
                     key={v.id}
                     onClick={() => setSelectedVariant(v)}
                     className={`
-                      relative px-3 py-1 text-[11px] sm:text-xs
-                      transition-all duration-200
+                      relative px-3 py-1.5 text-xs font-semibold tracking-tight
+                      transition-all duration-200 rounded-md
                       ${isSelected
-                        ? 'bg-[#0f2e2a] text-white font-semibold -translate-y-1 shadow-md rounded-md'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900 rounded-md'
+                        ? 'bg-[#0f2e2a] text-white shadow-md -translate-y-1'
+                        : 'bg-white border border-gray-400 text-[#0f2e2a] hover:border-[#0f2e2a] hover:bg-gray-50'
                       }
                     `}
                   >
