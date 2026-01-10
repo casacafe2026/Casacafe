@@ -39,33 +39,29 @@ export default function Checkout() {
       status: 'pending'
     })
 
-    if (error) {
-      alert('Order failed: ' + error.message)
-    } else {
+    if (error) alert('Order failed: ' + error.message)
+    else {
       clearCart()
       setOrderSuccess(true)
     }
+
     setLoading(false)
   }
 
   if (orderSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center px-6 py-20">
-        <div className="text-center max-w-2xl">
-          <div className="mb-12">
-            <svg className="w-32 h-32 mx-auto text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h1 className="text-5xl lg:text-7xl font-extrabold text-black mb-8">
-            Order Placed Successfully!
-          </h1>
-          <p className="text-2xl lg:text-3xl text-black mb-12">
-            Thank you for your order. Our team is preparing it with love. We'll notify you when it's ready!
+        <div className="text-center max-w-xl">
+          <svg className="w-28 h-28 mx-auto text-green-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h1 className="text-3xl sm:text-5xl font-extrabold mb-4">Order Placed!</h1>
+          <p className="text-lg sm:text-xl text-black/90 mb-8">
+            Thank you for your order. We’ll notify you when it’s ready!
           </p>
           <Link
             href="/"
-            className="inline-block bg-amber-600 hover:bg-amber-700 text-white px-16 py-6 rounded-full text-2xl lg:text-3xl font-bold shadow-2xl hover:shadow-3xl transition-all duration-300"
+            className="bg-amber-600 hover:bg-amber-700 text-white px-10 py-3 rounded-full text-lg shadow-lg transition"
           >
             Back to Home
           </Link>
@@ -75,53 +71,50 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-100 to-amber-50 py-12 lg:py-20 px-4 sm:px-6 lg:px-16">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-5xl lg:text-7xl font-extrabold text-center text-black mb-12 tracking-wide uppercase">
-          Checkout
-        </h1>
+    <div className="min-h-screen bg-gradient-to-b from-stone-100 to-amber-50 py-10 px-4 sm:px-6">
+      <div className="max-w-md mx-auto">
+        <h1 className="text-center text-4xl sm:text-5xl font-extrabold mb-10">Checkout</h1>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-8 lg:p-12">
-          <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+
             {/* NAME */}
-            <div className="relative">
-              <label className="block text-xl lg:text-2xl font-medium text-black mb-2">Your Name</label>
+            <div>
+              <label className="block text-black font-medium mb-1">Your Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Enter your name"
+                placeholder="Enter name"
                 required
-                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition shadow-sm focus:shadow-md"
+                className="w-full px-4 py-3 border border-stone-300 rounded-xl text-black text-base placeholder-stone-500 focus:border-amber-600 outline-none"
               />
             </div>
 
             {/* PHONE */}
-            <div className="relative">
-              <label className="block text-xl lg:text-2xl font-medium text-black mb-2">Phone Number</label>
+            <div>
+              <label className="block text-black font-medium mb-1">Phone Number</label>
               <input
                 type="tel"
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
-                placeholder="Enter your phone number"
+                placeholder="Enter phone number"
                 required
-                className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition shadow-sm focus:shadow-md"
+                className="w-full px-4 py-3 border border-stone-300 rounded-xl text-black text-base placeholder-stone-500 focus:border-amber-600 outline-none"
               />
             </div>
 
             {/* TABLE NUMBER */}
             {!isTakeaway && (
-              <div className="relative">
-                <label className="block text-xl lg:text-2xl font-medium text-black mb-2">Table Number</label>
+              <div>
+                <label className="block text-black font-medium mb-1">Table Number</label>
                 <select
                   value={table}
                   onChange={e => setTable(e.target.value)}
-                  required={!isTakeaway}
-                  className="w-full px-6 py-4 border-2 border-amber-200 rounded-xl text-lg focus:border-amber-600 outline-none transition shadow-sm focus:shadow-md bg-white"
+                  required
+                  className="w-full px-4 py-3 border border-stone-300 rounded-xl text-black text-base bg-white focus:border-amber-600 outline-none"
                 >
-                  <option value="" disabled>
-                    Select your table
-                  </option>
+                  <option value="" disabled>Select table</option>
                   {[1,2,3,4,5,6,7].map(t => (
                     <option key={t} value={t}>Table {t}</option>
                   ))}
@@ -129,23 +122,21 @@ export default function Checkout() {
               </div>
             )}
 
-            {/* ORDER SUMMARY */}
-            <div className="bg-amber-50 rounded-2xl p-6 lg:p-8 shadow-inner">
-              <p className="text-xl lg:text-2xl font-medium text-black mb-2">
-                Order Type: <span className="font-bold text-black">{isTakeaway ? 'Takeaway' : 'Dine-In'}</span>
-              </p>
-              <p className="text-3xl lg:text-4xl font-bold text-black">
-                Total: ₹{totalPrice.toFixed(0)}
-              </p>
+            {/* ORDER */}
+            <div className="bg-amber-50 rounded-xl p-4 flex justify-between items-center shadow-inner">
+              <span className="text-black font-medium">
+                {isTakeaway ? 'Takeaway' : 'Dine-In'}
+              </span>
+              <span className="text-2xl font-bold text-black">₹{totalPrice.toFixed(0)}</span>
             </div>
 
-            {/* PLACE ORDER BUTTON */}
+            {/* BUTTON */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 disabled:opacity-70 disabled:cursor-not-allowed text-white py-6 rounded-full text-2xl lg:text-3xl font-medium shadow-2xl hover:shadow-3xl transition-all duration-300"
+              className="w-full bg-amber-600 hover:bg-amber-700 disabled:opacity-60 text-white py-3 rounded-full text-lg font-semibold shadow-lg transition"
             >
-              {loading ? 'Placing Order...' : 'Confirm & Place Order'}
+              {loading ? 'Placing Order...' : 'Place Order'}
             </button>
           </form>
         </div>
