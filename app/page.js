@@ -7,6 +7,7 @@ import Image from 'next/image'
 import FloatingCart from './FloatingCart'
 import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
+import { BsCupHot } from 'react-icons/bs'
 
 export default function Home() {
   const [categories, setCategories] = useState([])
@@ -216,51 +217,23 @@ export default function Home() {
   return (
     <>
       {/* HERO */}
-      <section
-        ref={heroRef}
-        className="relative min-h-screen flex flex-col items-center bg-[#4f193c] overflow-hidden pt-20"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.4, ease: 'easeOut' }}
-          className="relative z-10 -translate-y-20 md:-translate-y-28"
-        >
-          <div className="w-[100vw] h-[100vw] sm:w-[86vw] sm:h-[86vw] md:w-[56rem] md:h-[56rem] lg:w-[72rem] lg:h-[72rem] mx-auto">
-            <Image
-              src="/logo.png"
-              alt="CASA CAFÉ"
-              fill
-              priority
-              className="object-contain drop-shadow-[0_50px_140px_rgba(0,0,0,0.55)]"
-            />
-          </div>
-        </motion.div>
+      {/* HERO */}
+<section ref={heroRef} className="relative min-h-screen flex flex-col items-center bg-gradient-to-b from-[#4f193c] via-[#3a122d] to-[#1a0a14] overflow-hidden pt-20" >
+      {/* Logo - slightly bigger */}
+      <motion.div initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.4, ease: "easeOut" }} className="relative z-10 -translate-y-12 md:-translate-y-20" >
+        <div className="w-[75vw] h-[75vw] sm:w-[55vw] sm:h-[55vw] md:w-[34rem] md:h-[34rem] lg:w-[44rem] lg:h-[44rem] mx-auto">
+          <Image src="/logo.png" alt="CASA CAFÉ" fill priority className="object-contain drop-shadow-[0_40px_120px_rgba(0,0,0,0.55)]" />
+        </div>
+      </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.6 }}
-          className="relative z-10 -translate-y-8"
-        >
-          <Link
-            href="/menu"
-            className="
-              relative inline-flex items-center justify-center
-              bg-[#d4af7f] hover:bg-[#c4996c]
-              text-[#4f193c]
-              px-10 py-4 sm:px-14 sm:py-5
-              text-sm sm:text-base md:text-lg
-              rounded-full tracking-[0.35em]
-              transition-all duration-300
-              hover:scale-105
-              shadow-[0_0_0_2px_rgba(212,175,127,0.4),0_18px_45px_rgba(0,0,0,0.25)]
-            "
-          >
-            Explore Menu
-          </Link>
-        </motion.div>
-      </section>
+      {/* Premium Button - smaller */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6 }} className="relative z-10 -translate-y-6" >
+        <Link href="/menu" className=" group relative inline-flex items-center justify-center gap-2 px-6 py-3 text-base md:text-lg font-serif text-[#d4af7f] rounded-full border-2 border-[#d4af7f]/50 transition-all duration-500 hover:border-[#d4af7f] hover:shadow-[0_0_40px_rgba(212,175,127,0.7)] hover:scale-105 " >
+          <BsCupHot className="text-[#d4af7f] text-lg md:text-xl" />
+          <span className="capitalize">Explore menu</span>
+        </Link>
+      </motion.div>
+    </section>
 
       {/* TOP SELLING */}
       <ItemCarousel title="Top Selling" subtitle="Customer Favorites" items={topSelling} />
