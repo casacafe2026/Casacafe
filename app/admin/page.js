@@ -1,4 +1,3 @@
-// app/admin/page.js
 'use client'
 
 import Header from './components/Header'
@@ -9,6 +8,7 @@ import BillsTab from './components/BillsTab'
 import SpecialTab from './components/SpecialTab'
 import CombosTab from './components/CombosTab'
 import AddonsTab from './components/AddonsTab'
+import SalesReportTab from './components/SalesReportTab' // ← NEW
 import ItemModal from './components/ItemModal'
 import SpecialModal from './components/SpecialModal'
 import ComboModal from './components/ComboModal'
@@ -30,18 +30,21 @@ export default function AdminPanel() {
         <TabsNavigation
           activeTab={adminData.activeTab}
           setActiveTab={adminData.setActiveTab}
-          setNewOrderCount={adminData.setNewOrderCount}  // ← Critical fix
+          setNewOrderCount={adminData.setNewOrderCount}
           newOrderCount={adminData.newOrderCount}
           ordersLength={adminData.orders.length}
         />
 
+        {/* Tab Content */}
         {adminData.activeTab === 'orders' && <OrdersTab {...adminData} />}
         {adminData.activeTab === 'menu' && <MenuTab {...adminData} />}
         {adminData.activeTab === 'bills' && <BillsTab {...adminData} />}
         {adminData.activeTab === 'special' && <SpecialTab {...adminData} />}
         {adminData.activeTab === 'combos' && <CombosTab {...adminData} />}
         {adminData.activeTab === 'addons' && <AddonsTab {...adminData} />}
+        {adminData.activeTab === 'sales' && <SalesReportTab {...adminData} />} {/* ← NEW */}
 
+        {/* Modals */}
         <ItemModal {...adminData} />
         <SpecialModal {...adminData} />
         <ComboModal {...adminData} />

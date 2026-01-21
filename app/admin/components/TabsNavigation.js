@@ -4,7 +4,7 @@ import { Bell } from 'lucide-react'
 export default function TabsNavigation({ 
   activeTab, 
   setActiveTab, 
-  setNewOrderCount,  // ← Receive the setter
+  setNewOrderCount,  
   newOrderCount, 
   ordersLength 
 }) {
@@ -14,7 +14,8 @@ export default function TabsNavigation({
     { key: 'bills', label: 'Bills' },
     { key: 'special', label: "Today's Special" },
     { key: 'combos', label: 'Combos' },
-    { key: 'addons', label: 'Addons' }
+    { key: 'addons', label: 'Addons' },
+    { key: 'sales', label: 'Sales Report' }  // ← NEW TAB ADDED
   ]
 
   return (
@@ -25,7 +26,7 @@ export default function TabsNavigation({
           onClick={() => {
             setActiveTab(tab.key)
             if (tab.key === 'orders' && typeof setNewOrderCount === 'function') {
-              setNewOrderCount(0)  // ← Now safely calls the function
+              setNewOrderCount(0)
             }
           }}
           className={`relative px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-lg ${

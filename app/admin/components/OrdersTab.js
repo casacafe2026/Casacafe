@@ -1,5 +1,8 @@
 'use client'
+
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { supabase } from '../../lib/supabase' // adjust path if needed
+import { Trash2 } from 'lucide-react'
 
 /* ---------- Time helpers ---------- */
 function formatDateTime(date) {
@@ -21,31 +24,42 @@ function timeSince(date) {
 }
 
 /* ------------------------------ */
-export default function OrdersTab({ orders, updateStatus }) {
+export default function OrdersTab({ orders: initialOrders, updateStatus }) {
+  const [orders, setOrders] = useState(initialOrders || [])
   const [search, setSearch] = useState('')
   const [, forceTick] = useState(0)
   const searchRef = useRef(null)
+  const [orderToDelete, setOrderToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
-  /* refresh timer every 10s for highlighting */
+  /* Refresh timer every 10s for highlighting */
   useEffect(() => {
     const i = setInterval(() => forceTick(t => t + 1), 10000)
     return () => clearInterval(i)
   }, [])
 
-  /* autofocus search */
+  /* Autofocus search */
   useEffect(() => {
     searchRef.current?.focus()
   }, [])
 
-  /* filter by table */
+  /* Sync orders from props (if parent updates) */
+  useEffect(() => {
+    setOrders(initialOrders || [])
+  }, [initialOrders])
+
+  /* Filter by table + exclude deleted */
   const filteredOrders = useMemo(() => {
-    if (!search) return orders
-    return orders.filter(o =>
-      String(o.address?.table || '').includes(search)
+    const activeOrders = orders.filter(o => !o.deleted_at) // hide soft-deleted
+
+    if (!search) return activeOrders
+
+    return activeOrders.filter(o =>
+      String(o.address?.table || '').toLowerCase().includes(search.toLowerCase())
     )
   }, [orders, search])
 
-  const pendingOrders = filteredOrders.filter(o => o.status !== 'delivered')
+  const pendingOrders = filteredOrders.filter(o => o.status !== 'delivered' && o.status !== 'deleted')
   const completedOrders = filteredOrders.filter(o => o.status === 'delivered')
 
   const isOldOrder = (created_at) => {
@@ -53,9 +67,38 @@ export default function OrdersTab({ orders, updateStatus }) {
     return diffMins > 10
   }
 
-  return (
-    <div className="space-y-8">
+  /* Soft Delete Handler */
+  const handleDeleteOrder = async () => {
+    if (!orderToDelete) return
 
+    setDeleting(true)
+
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          deleted_at: new Date().toISOString(),
+          status: 'deleted' // optional
+        })
+        .eq('id', orderToDelete)
+
+      if (error) throw error
+
+      // Remove from UI immediately
+      setOrders(prev => prev.filter(o => o.id !== orderToDelete))
+
+      alert('Order deleted successfully!')
+    } catch (err) {
+      console.error('Delete failed:', err)
+      alert('Failed to delete order. Check console.')
+    } finally {
+      setDeleting(false)
+      setOrderToDelete(null)
+    }
+  }
+
+  return (
+    <div className="space-y-8 relative">
       {/* SEARCH */}
       <div className="sticky top-0 z-20 bg-white pb-4">
         <input
@@ -63,8 +106,7 @@ export default function OrdersTab({ orders, updateStatus }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="🔍 Search by table number"
-          className="w-full px-4 py-3 text-base sm:text-lg rounded-2xl border-2 border-gray-300
-                     focus:outline-none focus:ring-4 focus:ring-amber-200"
+          className="w-full px-4 py-3 text-base sm:text-lg rounded-2xl border-2 border-gray-300 focus:outline-none focus:ring-4 focus:ring-amber-200"
         />
       </div>
 
@@ -81,6 +123,7 @@ export default function OrdersTab({ orders, updateStatus }) {
         ) : (
           pendingOrders.map(order => {
             const old = isOldOrder(order.created_at)
+
             return (
               <div
                 key={order.id}
@@ -126,6 +169,15 @@ export default function OrdersTab({ orders, updateStatus }) {
                         <option value="ready">Ready</option>
                         <option value="delivered">Delivered</option>
                       </select>
+
+                      {/* Delete Button */}
+                      <button
+                        onClick={() => setOrderToDelete(order.id)}
+                        className="text-red-600 hover:text-red-800 font-medium text-sm mt-2 flex items-center gap-1"
+                      >
+                        <Trash2 size={16} />
+                        Delete
+                      </button>
                     </div>
                   </div>
 
@@ -181,28 +233,105 @@ export default function OrdersTab({ orders, updateStatus }) {
           Completed Orders ({completedOrders.length})
         </h2>
 
-        <div className="space-y-2 sm:space-y-3">
-          {completedOrders.map(order => (
-            <div
-              key={order.id}
-              className="bg-white/70 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 flex justify-between items-center border border-green-200"
-            >
-              <div>
-                <p className="font-bold text-gray-900 text-sm sm:text-base">
-                  Table {order.address?.table} — Order #{order.id}
-                </p>
-                <p className="text-xs sm:text-sm text-gray-500">
-                  {formatDateTime(order.created_at)}
-                </p>
-              </div>
+        {completedOrders.length === 0 ? (
+          <p className="text-center text-gray-500 py-8 text-base sm:text-lg">
+            No completed orders yet
+          </p>
+        ) : (
+          <div className="space-y-2 sm:space-y-3">
+            {completedOrders.map(order => (
+              <div
+                key={order.id}
+                className="bg-white/70 rounded-xl sm:rounded-2xl px-4 sm:px-5 py-3 flex justify-between items-center border border-green-200"
+              >
+                <div>
+                  <p className="font-bold text-gray-900 text-sm sm:text-base">
+                    Table {order.address?.table} — Order #{order.id}
+                  </p>
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    {formatDateTime(order.created_at)}
+                  </p>
+                </div>
 
-              <p className="text-lg sm:text-xl font-black text-green-600">
-                ₹{(order.total_amount / 100).toFixed(0)}
-              </p>
-            </div>
-          ))}
-        </div>
+                <div className="flex items-center gap-4">
+                  <p className="text-lg sm:text-xl font-black text-green-600">
+                    ₹{(order.total_amount / 100).toFixed(0)}
+                  </p>
+
+                  <button
+                    onClick={() => setOrderToDelete(order.id)}
+                    className="text-red-600 hover:text-red-800"
+                    title="Delete order"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
+
+      {/* Delete Confirmation Modal */}
+      {orderToDelete && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <h3 className="text-2xl font-bold text-red-700 mb-4">
+              Delete Order?
+            </h3>
+            <p className="text-gray-700 mb-8">
+              This will soft-delete the order. It will no longer appear in any list.
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setOrderToDelete(null)}
+                disabled={deleting}
+                className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteOrder}
+                disabled={deleting}
+                className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center gap-2"
+              >
+                {deleting ? 'Deleting...' : 'Delete'}
+                {deleting && <span className="animate-spin">⏳</span>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
+}
+
+/* Soft Delete Handler */
+async function handleDeleteOrder() {
+  if (!orderToDelete) return
+
+  setDeleting(true)
+
+  try {
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        deleted_at: new Date().toISOString(),
+        status: 'deleted' // optional
+      })
+      .eq('id', orderToDelete)
+
+    if (error) throw error
+
+    // Remove from UI
+    setOrders(prev => prev.filter(o => o.id !== orderToDelete))
+
+    alert('Order soft-deleted successfully!')
+  } catch (err) {
+    console.error('Delete failed:', err)
+    alert('Failed to delete order. Check console.')
+  } finally {
+    setDeleting(false)
+    setOrderToDelete(null)
+  }
 }
