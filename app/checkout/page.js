@@ -100,13 +100,13 @@ export default function Checkout() {
             {/* NAME */}
             <div>
               <label className="block text-lg lg:text-xl font-semibold text-black mb-2">
-                Your Name
+                Your Name and Flat Detailsp
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="Enter your name"
+                placeholder="Name / Block/ Flat no."
                 required
                 className="w-full px-5 py-3 border border-stone-300 rounded-xl text-black placeholder-stone-500 text-base lg:text-lg focus:border-amber-600 outline-none shadow-sm focus:shadow-md transition"
               />
