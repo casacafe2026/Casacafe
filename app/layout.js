@@ -23,8 +23,8 @@ const playfair = Playfair_Display({
 
 export const metadata = {
   title: 'Casa Cafe',
-  description: 'Premium Cafe Experience',
-}
+  description: 'Serving Happiness',
+}e
 
 export default function RootLayout({ children }) {
   return (
