@@ -112,7 +112,7 @@ export default function Checkout() {
             {/* TABLE */}
             {!isTakeaway && (
               <div>
-                <label className="block text-lg lg:text-xl font-semibold text-black mb-2">Table Number</label>
+                <label className="block text-lg lg:text-xl font-semibold text-black mb-2">Flat Number</label>
                 <select
                   value={table}
                   onChange={e => setTable(e.target.value)}
