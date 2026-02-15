@@ -99,9 +99,9 @@ export default function CartPage() {
                   : 'bg-gray-100 text-black'
               }`}
             >
-              Dine-In
+              Take-Away
             </button>
-            <button
+{/* <button
               onClick={toggleOrderType}
               className={`px-4 py-2 rounded-md text-sm font-semibold ${
                 orderType === 'takeaway'
@@ -110,7 +110,7 @@ export default function CartPage() {
               }`}
             >
               Takeaway
-            </button>
+            </button>*/}
           </div>
           {orderType === 'takeaway' && (
             <p className="text-center mt-2 text-xs text-black">
