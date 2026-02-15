@@ -100,7 +100,7 @@ export default function Checkout() {
             {/* NAME */}
             <div>
               <label className="block text-lg lg:text-xl font-semibold text-black mb-2">
-                Your Name and Flat Detailsp
+                Your Name and Flat Details
               </label>
               <input
                 type="text"
