@@ -91,7 +91,7 @@ export default function CartPage() {
         <div className="bg-white rounded-md shadow p-4 mb-6">
           <p className="text-lg font-semibold mb-3 text-center text-black">Order Type</p>
           <div className="flex justify-center gap-3">
-            <button
+        {/* <button
               onClick={toggleOrderType}
               className={`px-4 py-2 rounded-md text-sm font-semibold ${
                 orderType === 'dine-in'
@@ -100,8 +100,8 @@ export default function CartPage() {
               }`}
             >
               Take-Away
-            </button>
-{/* <button
+            </button> */}
+ <button
               onClick={toggleOrderType}
               className={`px-4 py-2 rounded-md text-sm font-semibold ${
                 orderType === 'takeaway'
@@ -110,7 +110,7 @@ export default function CartPage() {
               }`}
             >
               Takeaway
-            </button>*/}
+            </button>
           </div>
           {orderType === 'takeaway' && (
             <p className="text-center mt-2 text-xs text-black">
