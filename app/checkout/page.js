@@ -8,11 +8,7 @@ export default function Checkout() {
   const { cart, totalPrice, takeawayFee, clearCart } = useCart()
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-
-  // OLD TABLE STATE (COMMENTED)
-  // const [table, setTable] = useState('')
-
-  const [flatNumber, setFlatNumber] = useState('')
+  const [table, setTable] = useState('')
   const [loading, setLoading] = useState(false)
   const [orderSuccess, setOrderSuccess] = useState(false)
 
@@ -38,11 +34,7 @@ export default function Checkout() {
       address: {
         name,
         phone,
-
-        // OLD TABLE FIELD (COMMENTED)
-        // table: isTakeaway ? null : table || null,
-
-        flatNumber: flatNumber || null
+        table: isTakeaway ? null : table || null
       },
       status: 'pending'
     })
@@ -61,13 +53,24 @@ export default function Checkout() {
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 flex items-center justify-center px-6 py-20">
         <div className="text-center max-w-xl">
-          <svg className="w-28 h-28 mx-auto text-green-600 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <svg
+            className="w-28 h-28 mx-auto text-green-600 mb-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
 
           <h1 className="text-4xl lg:text-6xl font-extrabold text-black mb-4">
             Order Successful!
           </h1>
+
           <p className="text-lg lg:text-2xl text-black/90 mb-8">
             Thank you! We’re preparing your order with love. We’ll notify you once it’s ready.
           </p>
@@ -124,49 +127,29 @@ export default function Checkout() {
               />
             </div>
 
-            {/* OLD TABLE DROPDOWN (COMMENTED) */}
-            {/*
+            {/* TABLE (TEXT INPUT INSTEAD OF DROPDOWN) */}
             {!isTakeaway && (
               <div>
                 <label className="block text-lg lg:text-xl font-semibold text-black mb-2">
-                  Table Number
+                  Flat Number
                 </label>
-                <select
+                <input
+                  type="text"
                   value={table}
                   onChange={e => setTable(e.target.value)}
+                  placeholder="Enter your Flat Number "
                   required={!isTakeaway}
-                  className="w-full px-5 py-3 border border-stone-300 rounded-xl bg-white text-black text-base lg:text-lg focus:border-amber-600 outline-none shadow-sm focus:shadow-md transition"
-                >
-                  <option value="" disabled>Select your table</option>
-                  {[1,2,3,4,5,6,7].map(t => (
-                    <option key={t} value={t}>Table {t}</option>
-                  ))}
-                </select>
+                  className="w-full px-5 py-3 border border-stone-300 rounded-xl text-black placeholder-stone-500 text-base lg:text-lg focus:border-amber-600 outline-none shadow-sm focus:shadow-md transition"
+                />
               </div>
             )}
-            */}
-
-            {/* FLAT NUMBER (FOR ALL ORDERS) */}
-            <div>
-              <label className="block text-lg lg:text-xl font-semibold text-black mb-2">
-                Flat Number
-              </label>
-              <input
-                type="text"
-                value={flatNumber}
-                onChange={e => setFlatNumber(e.target.value)}
-                placeholder="Enter your flat number"
-                required
-                className="w-full px-5 py-3 border border-stone-300 rounded-xl text-black placeholder-stone-500 text-base lg:text-lg focus:border-amber-600 outline-none shadow-sm focus:shadow-md transition"
-              />
-            </div>
 
             {/* SUMMARY */}
             <div className="bg-amber-50 rounded-xl p-6 shadow-inner border border-amber-200/40">
               <p className="text-lg lg:text-xl font-semibold text-black mb-2">
-                Order Type:
+                Order Type:{' '}
                 <span className="font-bold text-black">
-                  {isTakeaway ? ' Takeaway' : ' Dine-In'}
+                  {isTakeaway ? 'Takeaway' : 'Dine-In'}
                 </span>
               </p>
 
