@@ -11,8 +11,8 @@ export default function CartPage() {
     updateQuantity,
     removeFromCart,
     totalItems,
-    totalPrice,        // Already in rupees (e.g., 250.00)
-    takeawayFee,       // In paise (now fixed 1000 or 0)
+    totalPrice,        // In rupees (e.g. 250.00)
+    takeawayFee,       // In paise (1000 or 0)
     setTakeawayFee,
     addToCart
   } = useCart()
@@ -20,25 +20,15 @@ export default function CartPage() {
   const [addonCategories, setAddonCategories] = useState([])
   const [loadingAddons, setLoadingAddons] = useState(true)
 
-  const orderType = takeawayFee > 0 ? 'takeaway' : 'dine-in'
-
-  const toggleOrderType = () => {
-    if (orderType === 'dine-in') {
-      // Fixed ₹10 packaging fee (1000 paise)
-      setTakeawayFee(1000)
+  // Always show ₹10 fee when cart has items
+  useEffect(() => {
+    if (totalItems > 0) {
+      setTakeawayFee(1000) // fixed ₹10 = 1000 paise
     } else {
       setTakeawayFee(0)
     }
-  }
+  }, [totalItems, setTakeawayFee])
 
-  // Set default to takeaway + ₹10 fee on first mount (if cart has items)
-  useEffect(() => {
-    if (totalItems > 0 && takeawayFee === 0) {
-      setTakeawayFee(1000) // fixed ₹10
-    }
-  }, [totalItems, takeawayFee, setTakeawayFee])
-
-  // Convert takeawayFee from paise to rupees
   const takeawayFeeInRupees = takeawayFee / 100
   const subtotal = totalPrice - takeawayFeeInRupees
 
@@ -92,38 +82,17 @@ export default function CartPage() {
           Your Cart ({totalItems} items)
         </h1>
 
-        {/* Order Type Toggle */}
+        {/* Order Type Info – now fixed as Takeaway */}
         <div className="bg-white rounded-md shadow p-4 mb-6">
-          <p className="text-lg font-semibold mb-3 text-center text-black">Order Type</p>
-          <div className="flex justify-center gap-3">
-            {/* <button
-              onClick={toggleOrderType}
-              className={`px-4 py-2 rounded-md text-sm font-semibold ${
-                orderType === 'dine-in'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-gray-100 text-black'
-              }`}
-            >
-              Dine-In
-            </button> */}
-
-            <button
-              onClick={toggleOrderType}
-              className={`px-4 py-2 rounded-md text-sm font-semibold ${
-                orderType === 'takeaway'
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-gray-100 text-black'
-              }`}
-            >
+          <p className="text-lg font-semibold mb-2 text-center text-black">Order Type</p>
+          <div className="flex justify-center">
+            <div className="px-6 py-2 rounded-md text-sm font-semibold bg-amber-600 text-white">
               Takeaway
-            </button>
+            </div>
           </div>
-
-          {orderType === 'takeaway' && (
-            <p className="text-center mt-2 text-xs text-black">
-              + ₹{takeawayFeeInRupees.toFixed(0)} packaging fee
-            </p>
-          )}
+          <p className="text-center mt-2 text-xs text-black">
+            + ₹10 packaging fee
+          </p>
         </div>
 
         {/* Cart Items List */}
@@ -255,12 +224,10 @@ export default function CartPage() {
           <p className="text-lg text-black">
             Subtotal: <span className="font-bold text-xl">₹{subtotal.toFixed(0)}</span>
           </p>
-          {takeawayFee > 0 && (
-            <p className="text-sm mt-2 text-black">
-              Packaging Fee:{' '}
-              <span className="font-bold">₹{takeawayFeeInRupees.toFixed(0)}</span>
-            </p>
-          )}
+          <p className="text-sm mt-2 text-black">
+            Packaging Fee:{' '}
+            <span className="font-bold">₹{takeawayFeeInRupees.toFixed(0)}</span>
+          </p>
           <p className="text-3xl font-black mt-4 text-amber-600">
             Total: ₹{totalPrice.toFixed(0)}
           </p>
